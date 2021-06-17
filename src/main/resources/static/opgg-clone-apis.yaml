@@ -1,102 +1,58 @@
 openapi: 3.0.2
 info:
   version: 1.0.0
-  title: Swagger Petstore
-  license:
-    name: MIT
+  title: COPY-OPGG api server
 servers:
-  - url: 'http://petstore.swagger.io/v1'
+  - url: 'http://192.168.155.56:8080'
+    description: 테스트용 사내 서버
 paths:
-  /pets:
+  /api/summoners/search-by-name/{searchWord}:
     get:
-      summary: List all pets
-      operationId: listPets
+      summary: Search 5 summoner names which start with the searchWord
+      operationId: searchByName
       tags:
-        - pets
+        - summoners
       parameters:
-        - name: limit
-          in: query
-          description: How many items to return at one time (max 100)
-          required: false
-          schema:
-            type: integer
-            format: int32
-      responses:
-        '200':
-          description: An paged array of pets
-          headers:
-            x-next:
-              description: A link to the next page of responses
-              schema:
-                type: string
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Pets'
-        default:
-          description: unexpected error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-    post:
-      summary: Create a pet
-      operationId: createPets
-      tags:
-        - pets
-      responses:
-        '201':
-          description: Null response
-        default:
-          description: unexpected error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-  '/pets/{petId}':
-    get:
-      summary: Info for a specific pet
-      operationId: showPetById
-      tags:
-        - pets
-      parameters:
-        - name: petId
+        - name: searchWord
           in: path
           required: true
-          description: The id of the pet to retrieve
+          description: word to search
           schema:
             type: string
       responses:
         '200':
-          description: Expected response to a valid request
+          description: summoner names
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Pets'
-        default:
-          description: unexpected error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/summoners'
 components:
   schemas:
-    Pet:
+    summoner:
       required:
         - id
         - name
       properties:
-        id:
+        accountId:
+          type: string
+        profileIconId:
+          type: integer
+        revistionDate:
           type: integer
           format: int64
         name:
           type: string
-        tag:
+        id:
           type: string
-    Pets:
+        puuid:
+          type: string
+        summonerLevel:
+          type: integer
+          format: int64
+    summoners:
       type: array
       items:
-        $ref: '#/components/schemas/Pet'
+        $ref: '#/components/schemas/summoner'
     Error:
       required:
         - code

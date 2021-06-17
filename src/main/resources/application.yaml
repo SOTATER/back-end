@@ -2,6 +2,6 @@ riot:
   apiKey: RGAPI-be10482a-a5d3-418f-a204-6a15a4d79178
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/sota
-    username: postgres
-    password: sooyoung
+    url: jdbc:postgresql://192.168.155.56:15432/postgres
+    username: admin
+    password: admin
