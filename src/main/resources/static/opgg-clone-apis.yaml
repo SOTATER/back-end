@@ -3,8 +3,8 @@ info:
   version: 1.0.0
   title: COPY-OPGG api server
 servers:
-  - url: 'http://192.168.155.56:8080'
-    description: 테스트용 사내 서버
+  - url: 'http://34.69.171.78:80'
+    description: 테스트용 GCP 서버
 paths:
   /api/summoners/search-by-name/{searchWord}:
     get:
