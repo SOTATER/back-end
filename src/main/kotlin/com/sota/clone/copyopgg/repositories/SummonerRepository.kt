@@ -10,6 +10,8 @@ import java.sql.ResultSet
 interface SummonerRepository {
     fun findById(id: String): SummonerDTO?
     fun searchFiveRowsByName(searchWord: String): Iterable<SummonerDTO>
+    fun searchByName(searchWord: String): SummonerDTO?
+    fun insertSummoner(summoner: SummonerDTO)
 }
 
 @Repository
@@ -27,8 +29,30 @@ class JdbcSummonerRepository(
         )
     }
 
+    override fun searchByName(searchWord: String): SummonerDTO? {
+        val request = "select * from summoners" +
+                " where lower(REPLACE(\"name\", ' ',''))=lower(REPLACE('$searchWord', ' ', ''))"
+        println(request)
+        val result = jdbc.query(request, this::mapToSummonerDTO)
+        println(result)
+
+        return if (result.size == 1) result[0] else null
+    }
+
     override fun findById(id: String): SummonerDTO? {
         return jdbc.queryForObject<SummonerDTO>("select * from summoners where \"id\"=?", this::mapToSummonerDTO, id)
+    }
+
+    override fun insertSummoner(summoner: SummonerDTO) {
+        jdbc.update("insert into summoners values(?,?,?,?,?,?,?)",
+            summoner.accountId,
+            summoner.profileIconId,
+            summoner.revisionDate,
+            summoner.name,
+            summoner.id,
+            summoner.puuid,
+            summoner.summonerLevel
+        )
     }
 
     fun mapToSummonerDTO(rs: ResultSet, rowNum: Int): SummonerDTO {

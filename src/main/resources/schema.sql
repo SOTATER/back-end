@@ -12,7 +12,7 @@ create table if not exists summoners (
 create table if not exists matches (
     "match_id" char(13) not null,
     primary key("match_id")
-)
+);
 
 create table if not exists summoners_matches (
     "match_id" char(13) references matches,
