@@ -1,0 +1,23 @@
+version: '2'
+
+services:
+    postgres:
+        container_name: postgres
+        image: postgres:13.3-alpine
+        restart: always
+        ports:
+        - 15432:5432
+        volumes:
+        - ${LOCAL_HOME}/docker/pgsql/pgdata:/var/lib/postgresql/data
+        environment:
+        - POSTGRES_USER=${POSTGRES_USER}
+        - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    pgadmin:
+        container_name: pgadmin
+        image: dpage/pgadmin4
+        restart: always
+        ports:
+            - 8088:80
+        environment:
+            - PGADMIN_DEFAULT_EMAIL=${PGADMIN_EMAIL}
+            - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_PASSWORD}
