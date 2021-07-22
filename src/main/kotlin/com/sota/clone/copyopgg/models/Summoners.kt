@@ -22,6 +22,14 @@ data class SummonerBriefInfo(
     val leaguePoints: Int
 )
 
+// data class for get-summoners-info response
+data class SummonerProfileInfo(
+    val puuid: String,
+    val name: String,
+    val summonerLevel: Long,
+    val profileIconId: Int
+)
+
 enum class Tier {
     IRON, BRONZE, SILVER, GOLD, PLATINUM, DIAMOND
 }

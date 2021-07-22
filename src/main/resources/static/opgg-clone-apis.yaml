@@ -5,6 +5,8 @@ info:
 servers:
   - url: 'http://34.69.171.78:80'
     description: 테스트용 GCP 서버
+  - url: 'http://192.168.9.63:8080'
+    description: geonho 테스트용 서버
 paths:
   /api/summoners/search-by-name/{searchWord}:
     get:
@@ -26,6 +28,26 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/summoners'
+  /api/summoners/profile-info/{searchWord}:
+    get:
+      summary: Get profile information of the summoner named searchWord
+      operationId: profileInfo
+      tags:
+        - summoners
+      parameters:
+        - name: searchWord
+          in: path
+          required: true
+          description: word to search
+          schema:
+            type: string
+      responses:
+        '200':
+          description: summoner profile information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/summoner-profile-info'
 components:
   schemas:
     summoner:
@@ -53,6 +75,19 @@ components:
       type: array
       items:
         $ref: '#/components/schemas/summoner'
+    summoner-profile-info:
+      required:
+        - puuid
+      properties:
+        puuid:
+          type: string
+        name:
+          type: string
+        summonerLevel:
+          type: integer
+          format: int64
+        profileIconId:
+          type: integer
     Error:
       required:
         - code
