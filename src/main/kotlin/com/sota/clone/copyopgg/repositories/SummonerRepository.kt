@@ -56,14 +56,19 @@ class JdbcSummonerRepository(
                 "on A.id = B.summoner_id\n" +
                 "where lower(replace(A.name,' ','')) like lower(replace( ? , ' ','')) limit 5;"
 
+    val insertSummonerSql =
+        "INSERT INTO summoners (\"accountid\", \"profileiconid\", \"revisiondate\", \"name\", \"id\", \"puuid\", \"summonerlevel\")\n" +
+                "VALUES (?, ?, ?, ?, ?, ?, ?)"
+
+    val findSummonerByIdSql = "select * from summoners where \"id\"=?"
+
     override fun insertSummoners(summoners: List<SummonerDTO>) {
 
     }
 
     override fun insertSummoner(summoner: SummonerDTO) {
         jdbc.update(
-            "INSERT INTO summoners (\"accountid\", \"profileiconid\", \"revisiondate\", \"name\", \"id\", \"puuid\", \"summonerlevel\")\n" +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?)",
+            insertSummonerSql,
             summoner.accountId,
             summoner.profileIconId,
             summoner.revisionDate,
@@ -150,7 +155,7 @@ class JdbcSummonerRepository(
     }
 
     override fun findById(id: String): SummonerDTO? {
-        return jdbc.queryForObject<SummonerDTO>("select * from summoners where \"id\"=?", this::mapToSummonerDTO, id)
+        return jdbc.queryForObject<SummonerDTO>(findSummonerByIdSql, this::mapToSummonerDTO, id)
     }
 
     fun mapToLeague(rs: ResultSet, rowNum: Int): League {
