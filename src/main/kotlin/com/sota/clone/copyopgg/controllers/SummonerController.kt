@@ -26,19 +26,19 @@ class SummonerController(
             required = true
         ) searchWord: String
     ): Iterable<SummonerBriefInfo> {
-        logger.info("Searching for summoner names that start with $searchWord")
+        logger.info("Searching for summoner names that start with '$searchWord'")
         return summonerRepo.searchFiveRowsByName(searchWord)
     }
 
     @GetMapping("/profile-info/{searchWord}")
-    fun getSummonerInfo(@PathVariable(name = "searchWord", required = true) searchWord: String): SummonerProfileInfo {
-        println("Searching for summoner information named $searchWord")
+    fun getSummonerInfo(@PathVariable(name = "searchWord", required = true) searchWord: String): SummonerBriefInfo {
+        logger.info("Searching for summoner information named '$searchWord'")
         var result = summonerRepo.searchByName(searchWord)
 
         if (result == null) {
-            println("Not in DB, search via riot api, key: " + System.getenv("RIOT_API_KEY"))
+            logger.info("Not in DB, search via riot api, key: " + System.getenv("RIOT_API_KEY"))
             val summoner = Orianna.summonerNamed(searchWord).withRegion(Region.KOREA).get()
-            result = SummonerDTO(
+            summonerRepo.insertSummoner(SummonerDTO(
                 accountId = summoner.accountId,
                 puuid = summoner.puuid,
                 id = summoner.id,
@@ -46,16 +46,17 @@ class SummonerController(
                 summonerLevel = summoner.level.toLong(),
                 profileIconId = summoner.profileIcon.id,
                 revisionDate = summoner.updated.millis
+            ))
+            result = SummonerBriefInfo(
+                id = summoner.id,
+                name = summoner.name,
+                profileIconId = summoner.profileIcon.id,
+                summonerLevel = summoner.level.toLong(),
+                leagueInfo = null
             )
-            summonerRepo.insertSummoner(result)
         }
 
-        return SummonerProfileInfo(
-            puuid = result.puuid,
-            name = result.name,
-            profileIconId = result.profileIconId,
-            summonerLevel = result.summonerLevel
-        )
+        return result
     }
 
     //테스트용
