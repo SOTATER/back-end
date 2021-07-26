@@ -33,30 +33,40 @@ class SummonerController(
     @GetMapping("/profile-info/{searchWord}")
     fun getSummonerInfo(@PathVariable(name = "searchWord", required = true) searchWord: String): SummonerBriefInfo {
         logger.info("Searching for summoner information named '$searchWord'")
-        var result = summonerRepo.searchByName(searchWord)
+        val result = summonerRepo.searchByName(searchWord)
 
-        if (result == null) {
+        return if (result == null) {
             logger.info("Not in DB, search via riot api, key: " + System.getenv("RIOT_API_KEY"))
             val summoner = Orianna.summonerNamed(searchWord).withRegion(Region.KOREA).get()
-            summonerRepo.insertSummoner(SummonerDTO(
-                accountId = summoner.accountId,
-                puuid = summoner.puuid,
-                id = summoner.id,
-                name = summoner.name,
-                summonerLevel = summoner.level.toLong(),
-                profileIconId = summoner.profileIcon.id,
-                revisionDate = summoner.updated.millis
-            ))
-            result = SummonerBriefInfo(
-                id = summoner.id,
-                name = summoner.name,
-                profileIconId = summoner.profileIcon.id,
-                summonerLevel = summoner.level.toLong(),
-                leagueInfo = null
-            )
-        }
 
-        return result
+            if (summoner.puuid == null) SummonerBriefInfo(
+                id = "",
+                name = "",
+                profileIconId = -1,
+                summonerLevel = -1,
+                leagueInfo = null
+            ) else {
+                summonerRepo.insertSummoner(
+                    SummonerDTO(
+                        accountId = summoner.accountId,
+                        puuid = summoner.puuid,
+                        id = summoner.id,
+                        name = summoner.name,
+                        summonerLevel = summoner.level.toLong(),
+                        profileIconId = summoner.profileIcon.id,
+                        revisionDate = summoner.updated.millis
+                    )
+                )
+
+                SummonerBriefInfo(
+                    id = summoner.id,
+                    name = summoner.name,
+                    profileIconId = summoner.profileIcon.id,
+                    summonerLevel = summoner.level.toLong(),
+                    leagueInfo = null
+                )
+            }
+        } else result
     }
 
     //테스트용
