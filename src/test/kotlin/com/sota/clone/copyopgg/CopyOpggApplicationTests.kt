@@ -1,4 +1,4 @@
-package com.sota.clone.copyopgg
+/* package com.sota.clone.copyopgg
 
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.context.SpringBootTest
@@ -10,4 +10,4 @@ class CopyOpggApplicationTests {
 	fun contextLoads() {
 	}
 
-}
+} */
