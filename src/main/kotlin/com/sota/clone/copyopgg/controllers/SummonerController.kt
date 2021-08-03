@@ -2,9 +2,11 @@ package com.sota.clone.copyopgg.controllers
 
 import com.merakianalytics.orianna.Orianna
 import com.merakianalytics.orianna.types.common.Region
+import com.merakianalytics.orianna.types.core.summoner.Summoner
 import com.sota.clone.copyopgg.models.*
 import com.sota.clone.copyopgg.repositories.JdbcSummonerRepository
 import com.sota.clone.copyopgg.repositories.SummonerRepository
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
@@ -19,7 +21,7 @@ class SummonerController(
     @Autowired val summonerRepo: SummonerRepository
 ) {
 
-    val logger = LoggerFactory.getLogger(SummonerController::class.java)
+    val logger: Logger = LoggerFactory.getLogger(SummonerController::class.java)
 
     @GetMapping("/search/auto-complete/{searchWord}")
     fun getMatchNames(
