@@ -8,10 +8,11 @@ import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Repository
 import java.sql.PreparedStatement
 import java.sql.ResultSet
+import java.sql.SQLException
 
 interface SummonerRepository {
     fun findById(id: String): SummonerDTO?
-    fun searchByName(searchWord: String): SummonerDTO?
+    fun searchByName(searchWord: String): SummonerBriefInfo?
     fun insertSummoner(summoner: SummonerDTO)
     fun searchFiveRowsByName(searchWord: String): Iterable<SummonerBriefInfo>
     fun insertSummoners(summoners: List<SummonerDTO>)
@@ -55,6 +56,9 @@ class JdbcSummonerRepository(
                 ") as B\n" +
                 "on A.id = B.summoner_id\n" +
                 "where lower(replace(A.name,' ','')) like lower(replace( ? , ' ','')) limit 5;"
+
+    val selectSummonerByNameSql =
+        "select id, name, summonerlevel, profileiconid from summoners where lower(REPLACE(\"name\", ' ',''))=lower(REPLACE(?, ' ', ''))"
 
     val insertSummonerSql =
         "INSERT INTO summoners (\"accountid\", \"profileiconid\", \"revisiondate\", \"name\", \"id\", \"puuid\", \"summonerlevel\")\n" +
@@ -144,12 +148,8 @@ class JdbcSummonerRepository(
         )
     }
 
-    override fun searchByName(searchWord: String): SummonerDTO? {
-        val request = "select * from summoners" +
-                " where lower(REPLACE(\"name\", ' ',''))=lower(REPLACE('$searchWord', ' ', ''))"
-        println(request)
-        val result = jdbc.query(request, this::mapToSummonerDTO)
-        println(result)
+    override fun searchByName(searchWord: String): SummonerBriefInfo? {
+        val result = jdbc.query(selectSummonerByNameSql, this::mapToSummonerBriefInfo, "$searchWord")
 
         return if (result.size == 1) result[0] else null
     }
@@ -168,18 +168,14 @@ class JdbcSummonerRepository(
     }
 
     fun mapToSummonerBriefInfo(rs: ResultSet, rowNum: Int): SummonerBriefInfo {
-
-        val leagueId = rs.getString("league_id")
-        val tier = rs.getString("tier")
-        val rank = rs.getString("rank")
-        val leaguePoints = rs.getInt("league_points")
-
-        val leagueInfo = if (leagueId != null) {
-            LeagueInfo(
+        val leagueInfo = if (columnExistsInResultSet(rs, "league_id")) {
+            val leagueId = rs.getString("league_id")
+            if (leagueId == null) null
+            else LeagueInfo(
                 leagueId,
-                Tier.valueOf(tier),
-                Rank.valueOf(rank),
-                leaguePoints
+                Tier.valueOf(rs.getString("tier")),
+                Rank.valueOf(rs.getString("rank")),
+                rs.getInt("league_points")
             )
         } else null
 

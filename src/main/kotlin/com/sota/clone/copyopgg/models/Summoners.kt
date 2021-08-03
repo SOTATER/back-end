@@ -27,14 +27,6 @@ data class LeagueInfo(
     val leaguePoints: Int
 )
 
-// data class for get-summoners-info response
-data class SummonerProfileInfo(
-    val puuid: String,
-    val name: String,
-    val summonerLevel: Long,
-    val profileIconId: Int
-)
-
 data class LeagueSummoner(
     val summonerId: String,
     val leagueId: String,

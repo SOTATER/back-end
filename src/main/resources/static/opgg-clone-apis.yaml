@@ -47,7 +47,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/summoner-profile-info'
+                $ref: '#/components/schemas/SummonerBriefInfo'
 components:
   schemas:
     SummonerBriefInfo:
@@ -102,19 +102,6 @@ components:
       type: array
       items:
         $ref: '#/components/schemas/SummonerBriefInfo'
-    summoner-profile-info:
-      required:
-        - puuid
-      properties:
-        puuid:
-          type: string
-        name:
-          type: string
-        summonerLevel:
-          type: integer
-          format: int64
-        profileIconId:
-          type: integer
     Error:
       required:
         - code

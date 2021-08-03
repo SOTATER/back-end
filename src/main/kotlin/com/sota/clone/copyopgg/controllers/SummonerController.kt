@@ -7,6 +7,8 @@ import com.sota.clone.copyopgg.repositories.JdbcSummonerRepository
 import com.sota.clone.copyopgg.repositories.SummonerRepository
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.client.RestTemplate
 import java.util.*
@@ -26,36 +28,48 @@ class SummonerController(
             required = true
         ) searchWord: String
     ): Iterable<SummonerBriefInfo> {
-        logger.info("Searching for summoner names that start with $searchWord")
+        logger.info("Searching for summoner names that start with '$searchWord'")
         return summonerRepo.searchFiveRowsByName(searchWord)
     }
 
     @GetMapping("/profile-info/{searchWord}")
-    fun getSummonerInfo(@PathVariable(name = "searchWord", required = true) searchWord: String): SummonerProfileInfo {
-        println("Searching for summoner information named $searchWord")
-        var result = summonerRepo.searchByName(searchWord)
-
-        if (result == null) {
-            println("Not in DB, search via riot api, key: " + System.getenv("RIOT_API_KEY"))
-            val summoner = Orianna.summonerNamed(searchWord).withRegion(Region.KOREA).get()
-            result = SummonerDTO(
-                accountId = summoner.accountId,
-                puuid = summoner.puuid,
-                id = summoner.id,
-                name = summoner.name,
-                summonerLevel = summoner.level.toLong(),
-                profileIconId = summoner.profileIcon.id,
-                revisionDate = summoner.updated.millis
+    fun getSummonerInfo(
+        @PathVariable(
+            name = "searchWord",
+            required = true
+        ) searchWord: String
+    ): ResponseEntity<SummonerBriefInfo> {
+        logger.info("Searching for summoner information named '$searchWord'")
+        val result = summonerRepo.searchByName(searchWord)
+        return result?.let {
+            ResponseEntity.ok().body(it)
+        } ?: this.getSummonerViaRiotApi(searchWord)?.let {
+            summonerRepo.insertSummoner(it)
+            ResponseEntity.ok().body(
+                SummonerBriefInfo(
+                    id = it.id,
+                    name = it.name,
+                    profileIconId = it.profileIconId,
+                    summonerLevel = it.summonerLevel,
+                    leagueInfo = null
+                )
             )
-            summonerRepo.insertSummoner(result)
-        }
+        } ?: ResponseEntity.notFound().build()
+    }
 
-        return SummonerProfileInfo(
-            puuid = result.puuid,
-            name = result.name,
-            profileIconId = result.profileIconId,
-            summonerLevel = result.summonerLevel
-        )
+    fun getSummonerViaRiotApi(searchWord: String): SummonerDTO? {
+        val fromOrianna = Orianna.summonerNamed(searchWord).withRegion(Region.KOREA).get()
+        return fromOrianna.puuid?.let {
+            SummonerDTO(
+                accountId = fromOrianna.accountId,
+                puuid = fromOrianna.puuid,
+                id = fromOrianna.id,
+                name = fromOrianna.name,
+                summonerLevel = fromOrianna.level.toLong(),
+                profileIconId = fromOrianna.profileIcon.id,
+                revisionDate = fromOrianna.updated.millis
+            )
+        } ?: null
     }
 
     //테스트용
