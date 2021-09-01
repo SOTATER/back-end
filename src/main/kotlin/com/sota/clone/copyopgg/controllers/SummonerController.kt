@@ -88,61 +88,6 @@ class SummonerController(
         // TODO: 로직 구현
         return ResponseEntity.notFound().build()
     }
-
-    //테스트용
-    //DB에 데이터 넣는 용도
-    fun loadSummonersFromRiotApi() {
-        val apiKey = ""
-        val template = RestTemplate()
-        val response = template.getForEntity(
-            "https://kr.api.riotgames.com/lol/league/v4/entries/RANKED_SOLO_5x5/DIAMOND/I?page=2&api_key=$apiKey",
-            Array<SummonerLeagueDTO>::class.java
-        )
-        val summoners = response.body!!
-
-        var count = 0
-        var index = 0
-        while (count < 30) {
-            val summoner = summoners[index]
-            val leagueId = summoner.leagueId
-            if (!leagueRepo.existsLeagueById(leagueId)) {
-                println(summoner.queueType)
-                println(summoner.tier)
-                val rowNum = leagueRepo.insertLeague(
-                    League(
-                        leagueId,
-                        Tier.valueOf(summoner.tier),
-                        Rank.valueOf(summoner.rank),
-                        QueueType.valueOf(summoner.queueType)
-                    )
-                )
-                if (rowNum == 1) {
-                    logger.info("league $leagueId inserted to table \"leagues\"")
-                }
-            }
-            val infoResponse = template.getForEntity(
-                "https://kr.api.riotgames.com/lol/summoner/v4/summoners/${summoner.summonerId}?api_key=$apiKey",
-                SummonerDTO::class.java
-            )
-            summonerRepo.insertSummoner(infoResponse.body!!)
-
-            leagueSummonerRepo.insertLeagueSummoner(
-                LeagueSummoner(
-                    summonerId = summoner.summonerId,
-                    leagueId = leagueId,
-                    leaguePoints = summoner.leaguePoints,
-                    wins = summoner.wins,
-                    loses = summoner.losses,
-                    veteran = summoner.veteran,
-                    inactive = summoner.inactive,
-                    freshBlood = summoner.freshBlood,
-                    hotStreak = summoner.hotStreak
-                )
-            )
-            count++
-            index++
-        }
-    }
 }
 
 data class SummonerLeagueDTO(

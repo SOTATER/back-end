@@ -1,6 +1,7 @@
 package com.sota.clone.copyopgg.controllers
 
 import com.sota.clone.copyopgg.models.LeagueSummoner
+import com.sota.clone.copyopgg.models.Rank
 import com.sota.clone.copyopgg.models.SummonerBriefInfo
 import com.sota.clone.copyopgg.models.SummonerDTO
 import com.sota.clone.copyopgg.repositories.LeagueSummonerRepository
@@ -138,6 +139,7 @@ class SummonerControllerTest {
         summonerId = "1234",
         leagueId = "1234",
         leaguePoints = 1234,
+        rank = Rank.I,
         wins = 1234,
         loses = 1234,
         veteran = true,

@@ -7,14 +7,14 @@
 --);
 --
 --create type tier as enum (
---    'DIAMOND', 'PLATINUM', 'GOLD', 'SILVER', 'BRONZE', 'IRON'
+--    'CHALLENGER', 'GRANDMASTER', 'MASTER', 'DIAMOND', 'PLATINUM', 'GOLD', 'SILVER', 'BRONZE', 'IRON'
 --);
 
 create table if not exists leagues (
   queue queue not null,
-  rank rank not null,
   tier tier not null,
   league_id char(36),
+  name char(36) not null,
   primary key ("league_id")
 );
 
@@ -36,6 +36,7 @@ create table if not exists league_summoner (
   veteran boolean not null,
   loses integer not null,
   wins integer not null,
+  rank rank not null,
   league_points integer not null,
   league_id char(36) not null,
   summoner_id varchar(63) not null,

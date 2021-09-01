@@ -4,6 +4,7 @@ data class LeagueSummoner(
     val summonerId: String,
     val leagueId: String,
     val leaguePoints: Int,
+    val rank: Rank,
     val wins: Int,
     val loses: Int,
     val veteran: Boolean,

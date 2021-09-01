@@ -23,7 +23,7 @@ class JdbcLeagueRepository(
     val logger = LoggerFactory.getLogger(LeagueRepository::class.java)
 
     val insertLeagueSql =
-        "INSERT INTO leagues (\"league_id\", \"tier\", \"rank\", \"queue\")\n" +
+        "INSERT INTO leagues (\"league_id\", \"tier\", \"queue\", \"name\")\n" +
                 "VALUES (?, ?::tier, ?::rank, ?::queue)"
 
     val selectLeagueSql =
@@ -38,8 +38,8 @@ class JdbcLeagueRepository(
             insertLeagueSql,
             league.leagueId,
             league.tier.toString(),
-            league.rank.toString(),
-            league.queue.toString()
+            league.queue.toString(),
+            league.name
         )
     }
 
@@ -49,8 +49,8 @@ class JdbcLeagueRepository(
                 val league = leagues[i]
                 ps.setString(1, league.leagueId)
                 ps.setString(2, league.tier.toString())
-                ps.setString(3, league.rank.toString())
                 ps.setString(4, league.queue.toString())
+                ps.setString(5, league.name)
             }
 
             override fun getBatchSize(): Int {
@@ -73,8 +73,8 @@ class JdbcLeagueRepository(
         return League(
             rs.getString("league_id"),
             Tier.valueOf(rs.getString("tier")),
-            Rank.valueOf(rs.getString("rank")),
-            QueueType.valueOf(rs.getString("queue"))
+            QueueType.valueOf(rs.getString("queue")),
+            rs.getString("name")
         )
     }
 }

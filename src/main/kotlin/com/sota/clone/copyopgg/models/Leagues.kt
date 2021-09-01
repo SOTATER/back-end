@@ -10,8 +10,8 @@ data class LeagueInfo(
 data class League(
     val leagueId: String,
     val tier: Tier,
-    val rank: Rank,
-    val queue: QueueType
+    val queue: QueueType,
+    val name: String
 )
 
 enum class QueueType {
@@ -19,7 +19,7 @@ enum class QueueType {
 }
 
 enum class Tier {
-    IRON, BRONZE, SILVER, GOLD, PLATINUM, DIAMOND
+    IRON, BRONZE, SILVER, GOLD, PLATINUM, DIAMOND, MASTER, GRANDMASTER, CHALLENGER
 }
 
 enum class Rank {
