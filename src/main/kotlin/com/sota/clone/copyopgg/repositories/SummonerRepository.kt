@@ -16,12 +16,6 @@ interface SummonerRepository {
     fun insertSummoner(summoner: SummonerDTO)
     fun searchFiveRowsByName(searchWord: String): Iterable<SummonerBriefInfo>
     fun insertSummoners(summoners: List<SummonerDTO>)
-    fun insertLeague(league: League): Int
-    fun insertLeagueSummoner(leagueSummoner: LeagueSummoner)
-    fun insertLeagues(leagues: List<League>)
-    fun insertLeagueSummoners(leagueSummoners: List<LeagueSummoner>)
-    fun findLeagueById(leagueId: String): League?
-    fun existsLeagueById(leagueId: String): Boolean
 }
 
 @Repository
@@ -30,20 +24,6 @@ class JdbcSummonerRepository(
 ) : SummonerRepository {
 
     val logger = LoggerFactory.getLogger(SummonerRepository::class.java)
-
-    val insertLeagueSummonerSql =
-        "INSERT INTO league_summoner (\"summoner_id\", \"league_id\", \"league_points\", \"wins\", \"loses\", \"veteran\", \"inactive\", \"fresh_blood\", \"hot_streak\")\n" +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
-
-    val insertLeagueSql =
-        "INSERT INTO leagues (\"league_id\", \"tier\", \"rank\", \"queue\")\n" +
-                "VALUES (?, ?::tier, ?::rank, ?::queue)"
-
-    val selectLeagueSql =
-        "SELECT * FROM leagues WHERE \"league_id\" = ?"
-
-    val existsLeagueSql =
-        "SELECT count(*) FROM leagues WHERE \"league_id\" = ?"
 
     val selectFiveSummonerBriefInfoSql =
         "select A.id, A.name, A.summonerlevel, A.profileiconid, B.league_id, B.tier, B.rank, B.league_points\n" +
@@ -83,62 +63,6 @@ class JdbcSummonerRepository(
         )
     }
 
-    override fun insertLeague(league: League): Int {
-        println("tier is [${league.tier}]")
-        return jdbc.update(
-            insertLeagueSql,
-            league.leagueId,
-            league.tier.toString(),
-            league.rank.toString(),
-            league.queue.toString()
-        )
-    }
-
-    override fun insertLeagues(leagues: List<League>) {
-        val rows = jdbc.batchUpdate(insertLeagueSql, object : BatchPreparedStatementSetter {
-            override fun setValues(ps: PreparedStatement, i: Int) {
-                val league = leagues[i]
-                ps.setString(1, league.leagueId)
-                ps.setString(2, league.tier.toString())
-                ps.setString(3, league.rank.toString())
-                ps.setString(4, league.queue.toString())
-            }
-
-            override fun getBatchSize(): Int {
-                return leagues.size
-            }
-        })
-        logger.info("$rows rows are inserted into leagues table")
-    }
-
-    override fun insertLeagueSummoners(leagueSummoners: List<LeagueSummoner>) {
-        TODO("Not yet implemented")
-    }
-
-    override fun findLeagueById(leagueId: String): League? {
-        return jdbc.queryForObject(selectLeagueSql, this::mapToLeague, leagueId)
-    }
-
-    override fun existsLeagueById(leagueId: String): Boolean {
-        val count = jdbc.queryForObject(existsLeagueSql, Integer::class.java, leagueId)
-        return count > 0
-    }
-
-    override fun insertLeagueSummoner(leagueSummoner: LeagueSummoner) {
-        jdbc.update(
-            insertLeagueSummonerSql,
-            leagueSummoner.summonerId,
-            leagueSummoner.leagueId,
-            leagueSummoner.leaguePoints,
-            leagueSummoner.wins,
-            leagueSummoner.loses,
-            leagueSummoner.veteran,
-            leagueSummoner.inactive,
-            leagueSummoner.freshBlood,
-            leagueSummoner.hotStreak
-        )
-    }
-
     override fun searchFiveRowsByName(searchWord: String): Iterable<SummonerBriefInfo> {
         val result = mutableListOf<SummonerBriefInfo>()
         return jdbc.query(
@@ -156,15 +80,6 @@ class JdbcSummonerRepository(
 
     override fun findById(id: String): SummonerDTO? {
         return jdbc.queryForObject<SummonerDTO>(findSummonerByIdSql, this::mapToSummonerDTO, id)
-    }
-
-    fun mapToLeague(rs: ResultSet, rowNum: Int): League {
-        return League(
-            rs.getString("league_id"),
-            Tier.valueOf(rs.getString("tier")),
-            Rank.valueOf(rs.getString("rank")),
-            QueueType.valueOf(rs.getString("queue"))
-        )
     }
 
     fun mapToSummonerBriefInfo(rs: ResultSet, rowNum: Int): SummonerBriefInfo {
