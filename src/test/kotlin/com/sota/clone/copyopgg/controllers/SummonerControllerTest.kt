@@ -1,7 +1,9 @@
 package com.sota.clone.copyopgg.controllers
 
+import com.sota.clone.copyopgg.models.LeagueSummoner
 import com.sota.clone.copyopgg.models.SummonerBriefInfo
 import com.sota.clone.copyopgg.models.SummonerDTO
+import com.sota.clone.copyopgg.repositories.LeagueSummonerRepository
 import com.sota.clone.copyopgg.repositories.SummonerRepository
 import io.mockk.*
 import io.mockk.impl.annotations.InjectMockKs
@@ -17,6 +19,9 @@ import org.springframework.http.ResponseEntity
 class SummonerControllerTest {
     @MockK
     private lateinit var summonerRepository: SummonerRepository
+
+    @MockK
+    private lateinit var leagueSummonerRepository: LeagueSummonerRepository
 
     @InjectMockKs
     @SpyK
@@ -81,6 +86,30 @@ class SummonerControllerTest {
         assert(summonerController.getSummonerInfo("tester") == ResponseEntity<SummonerBriefInfo>(HttpStatus.NOT_FOUND))
     }
 
+    @Test
+    fun testGetSummonerLeagueInfoInDB() {
+        // given
+        // LeagueSummoner repo에서 db에 있는 값 리턴
+        every { leagueSummonerRepository.getLeagueSummonerBySummonerId(any<String>()) } returns this.getLeagueSummoner()
+
+        // verify
+        // getBriefLeagueInfo 결과값 리턴 검증
+
+        // repo로부터 db 호출 검증
+        verify { leagueSummonerRepository.getLeagueSummonerBySummonerId(any<String>()) }
+    }
+
+    @Test
+    fun testGetSummonerLeagueInfoNotInDB() {
+        // given
+        // db에 데이터가 없으므로 null 리턴
+
+        // verify
+        // getBriefLeagueInfo에서 not found 리턴 (unranked) 처리
+
+        // repo를 통해 db 호출했는지 검증
+    }
+
     private fun getSummonerBriefInfo(succeed: Boolean) = if (succeed) SummonerBriefInfo(
         id = "test_id",
         name = "tester",
@@ -103,5 +132,17 @@ class SummonerControllerTest {
         profileIconId = 1234,
         name = "tester",
         revisionDate = 1234
+    )
+
+    private fun getLeagueSummoner() = LeagueSummoner(
+        summonerId = "1234",
+        leagueId = "1234",
+        leaguePoints = 1234,
+        wins = 1234,
+        loses = 1234,
+        veteran = true,
+        inactive = false,
+        freshBlood = true,
+        hotStreak = true,
     )
 }

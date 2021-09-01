@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository
 interface LeagueSummonerRepository {
     fun insertLeagueSummoners(leagueSummoners: List<LeagueSummoner>)
     fun insertLeagueSummoner(leagueSummoner: LeagueSummoner)
+    fun getLeagueSummonerBySummonerId(summonerId: String): LeagueSummoner?
 }
 
 @Repository
@@ -37,5 +38,10 @@ class JdbcLeagueSummonerRepository(
             leagueSummoner.freshBlood,
             leagueSummoner.hotStreak
         )
+    }
+
+    override fun getLeagueSummonerBySummonerId(summonerId: String): LeagueSummoner? {
+        TODO("Not yet implemented")
+        return null
     }
 }

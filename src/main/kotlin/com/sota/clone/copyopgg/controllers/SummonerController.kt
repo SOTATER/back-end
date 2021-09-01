@@ -5,6 +5,8 @@ import com.merakianalytics.orianna.types.common.Region
 import com.merakianalytics.orianna.types.core.summoner.Summoner
 import com.sota.clone.copyopgg.models.*
 import com.sota.clone.copyopgg.repositories.JdbcSummonerRepository
+import com.sota.clone.copyopgg.repositories.LeagueRepository
+import com.sota.clone.copyopgg.repositories.LeagueSummonerRepository
 import com.sota.clone.copyopgg.repositories.SummonerRepository
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -18,7 +20,9 @@ import java.util.*
 @RestController
 @RequestMapping("/api/summoners")
 class SummonerController(
-    @Autowired val summonerRepo: SummonerRepository
+    @Autowired val summonerRepo: SummonerRepository,
+    @Autowired val leagueRepo: LeagueRepository,
+    @Autowired val leagueSummonerRepo: LeagueSummonerRepository
 ) {
 
     val logger: Logger = LoggerFactory.getLogger(SummonerController::class.java)
@@ -74,6 +78,17 @@ class SummonerController(
         } ?: null
     }
 
+    @GetMapping("/league/brief/{searchId}")
+    fun getBriefLeagueInfo(
+        @PathVariable(
+            name = "searchId",
+            required = true
+        ) searchId: String
+    ): ResponseEntity<LeagueBriefInfoBySummoner> {
+        // TODO: 로직 구현
+        return ResponseEntity.notFound().build()
+    }
+
     //테스트용
     //DB에 데이터 넣는 용도
     fun loadSummonersFromRiotApi() {
@@ -90,10 +105,10 @@ class SummonerController(
         while (count < 30) {
             val summoner = summoners[index]
             val leagueId = summoner.leagueId
-            if (!summonerRepo.existsLeagueById(leagueId)) {
+            if (!leagueRepo.existsLeagueById(leagueId)) {
                 println(summoner.queueType)
                 println(summoner.tier)
-                val rowNum = summonerRepo.insertLeague(
+                val rowNum = leagueRepo.insertLeague(
                     League(
                         leagueId,
                         Tier.valueOf(summoner.tier),
@@ -111,7 +126,7 @@ class SummonerController(
             )
             summonerRepo.insertSummoner(infoResponse.body!!)
 
-            summonerRepo.insertLeagueSummoner(
+            leagueSummonerRepo.insertLeagueSummoner(
                 LeagueSummoner(
                     summonerId = summoner.summonerId,
                     leagueId = leagueId,

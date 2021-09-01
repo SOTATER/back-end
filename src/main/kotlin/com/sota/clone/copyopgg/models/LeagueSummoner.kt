@@ -11,3 +11,12 @@ data class LeagueSummoner(
     val freshBlood: Boolean,
     val hotStreak: Boolean
 )
+
+data class LeagueBriefInfoBySummoner(
+    val leaguePoints: Int,
+    val wins: Int,
+    val loses: Int,
+    val tier: Tier?,
+    val rank: Rank?,
+    val leagueName: String,
+)
