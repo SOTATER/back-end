@@ -85,8 +85,21 @@ class SummonerController(
             required = true
         ) searchId: String
     ): ResponseEntity<LeagueBriefInfoBySummoner> {
-        // TODO: 로직 구현
-        return ResponseEntity.notFound().build()
+        logger.info("Get league brief information with summoner id: $searchId")
+        return this.leagueSummonerRepo.getLeagueSummonerBySummonerId(searchId)?.let { leagueSummoner ->
+            this.leagueRepo.findLeagueById(leagueSummoner.leagueId)?.let { league ->
+                ResponseEntity.ok().body(
+                    LeagueBriefInfoBySummoner(
+                        tier = league.tier,
+                        wins = leagueSummoner.wins,
+                        loses = leagueSummoner.loses,
+                        leaguePoints = leagueSummoner.leaguePoints,
+                        leagueName = league.name,
+                        rank = leagueSummoner.rank
+                    )
+                )
+            } ?: ResponseEntity.notFound().build()
+        } ?: ResponseEntity.notFound().build()
     }
 }
 

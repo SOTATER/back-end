@@ -1,9 +1,7 @@
 package com.sota.clone.copyopgg.controllers
 
-import com.sota.clone.copyopgg.models.LeagueSummoner
-import com.sota.clone.copyopgg.models.Rank
-import com.sota.clone.copyopgg.models.SummonerBriefInfo
-import com.sota.clone.copyopgg.models.SummonerDTO
+import com.sota.clone.copyopgg.models.*
+import com.sota.clone.copyopgg.repositories.LeagueRepository
 import com.sota.clone.copyopgg.repositories.LeagueSummonerRepository
 import com.sota.clone.copyopgg.repositories.SummonerRepository
 import io.mockk.*
@@ -23,6 +21,9 @@ class SummonerControllerTest {
 
     @MockK
     private lateinit var leagueSummonerRepository: LeagueSummonerRepository
+
+    @MockK
+    private lateinit var leagueRepository: LeagueRepository
 
     @InjectMockKs
     @SpyK
@@ -92,23 +93,35 @@ class SummonerControllerTest {
         // given
         // LeagueSummoner repo에서 db에 있는 값 리턴
         every { leagueSummonerRepository.getLeagueSummonerBySummonerId(any<String>()) } returns this.getLeagueSummoner()
+        // League repo에서 db에 있는 값 리턴
+        every { leagueRepository.findLeagueById(any<String>()) } returns this.getLeague()
 
         // verify
         // getBriefLeagueInfo 결과값 리턴 검증
+        assert( summonerController.getBriefLeagueInfo("tester") == ResponseEntity.ok().body(this.getLeagueBriefInfo()))
 
         // repo로부터 db 호출 검증
-        verify { leagueSummonerRepository.getLeagueSummonerBySummonerId(any<String>()) }
+        verify {
+            leagueSummonerRepository.getLeagueSummonerBySummonerId(any<String>())
+            leagueRepository.findLeagueById(any<String>())
+        }
     }
 
     @Test
     fun testGetSummonerLeagueInfoNotInDB() {
         // given
         // db에 데이터가 없으므로 null 리턴
+        every { leagueSummonerRepository.getLeagueSummonerBySummonerId(any<String>()) } returns null
+        every { leagueRepository.findLeagueById(any<String>()) } returns this.getLeague()
 
         // verify
         // getBriefLeagueInfo에서 not found 리턴 (unranked) 처리
+        assert( summonerController.getBriefLeagueInfo("tester") == ResponseEntity<LeagueBriefInfoBySummoner>(HttpStatus.NOT_FOUND))
 
         // repo를 통해 db 호출했는지 검증
+        verify {
+            leagueSummonerRepository.getLeagueSummonerBySummonerId(any<String>())
+        }
     }
 
     private fun getSummonerBriefInfo(succeed: Boolean) = if (succeed) SummonerBriefInfo(
@@ -146,5 +159,21 @@ class SummonerControllerTest {
         inactive = false,
         freshBlood = true,
         hotStreak = true,
+    )
+
+    private fun getLeague() = League(
+        leagueId = "1234",
+        tier = Tier.SILVER,
+        queue = QueueType.RANKED_SOLO_5x5,
+        name = "1234"
+    )
+
+    private fun getLeagueBriefInfo() = LeagueBriefInfoBySummoner(
+        leaguePoints = 1234,
+        wins = 1234,
+        loses = 1234,
+        tier = Tier.SILVER,
+        rank = Rank.I,
+        leagueName = "1234"
     )
 }
