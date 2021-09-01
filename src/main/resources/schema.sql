@@ -14,7 +14,7 @@ create table if not exists leagues (
   queue queue not null,
   tier tier not null,
   league_id char(36),
-  name char(36) not null,
+  name varchar(36) not null,
   primary key ("league_id")
 );
 
