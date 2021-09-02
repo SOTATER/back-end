@@ -25,6 +25,9 @@ class SummonerControllerTest {
     @MockK
     private lateinit var leagueRepository: LeagueRepository
 
+    @MockK
+    private lateinit var riotApiController: RiotApiController
+
     @InjectMockKs
     @SpyK
     private lateinit var summonerController: SummonerController
@@ -57,7 +60,7 @@ class SummonerControllerTest {
         // Summoner Repository에서 db에 데이터가 없으므로 null 리턴
         every { summonerRepository.searchByName(any<String>()) } returns null
         // db에 데이터가 없으므로, riot api를 통해 summoner 데이터 get
-        every { summonerController.getSummonerViaRiotApi(any<String>()) } returns this.getSummonerDTO()
+        every { riotApiController.getSummoner(any<String>()) } returns this.getSummonerDTO()
         // get한 summoner data는 db에 insert
         every { summonerRepository.insertSummoner(any<SummonerDTO>()) } just Runs
 
@@ -69,7 +72,7 @@ class SummonerControllerTest {
         // verify
         verify {
             // riot api 호출 검증
-            summonerController.getSummonerViaRiotApi(any<String>())
+            riotApiController.getSummoner(any<String>())
             // db insert api 호출 검증
             summonerRepository.insertSummoner(any<SummonerDTO>())
         }
@@ -81,7 +84,7 @@ class SummonerControllerTest {
         // db에 데이터가 없으므로 null 리턴
         every { summonerRepository.searchByName(any<String>()) } returns null
         // riot api로부터도 데이터가 없으므로 null 리턴
-        every { summonerController.getSummonerViaRiotApi(any<String>()) } returns null
+        every { riotApiController.getSummoner(any<String>()) } returns null
 
         // verify
         // getSummonerInfo API에서 빈 결과 리턴 검증
@@ -122,6 +125,19 @@ class SummonerControllerTest {
         verify {
             leagueSummonerRepository.getLeagueSummonerBySummonerId(any<String>())
         }
+    }
+
+    @Test
+    fun testRefresh() {
+        // given
+        // match db sync 콜
+        // league db sync 콜
+        // league_summoner db sync 콜
+
+        // when
+        // refresh function 콜
+
+        // verify
     }
 
     private fun getSummonerBriefInfo(succeed: Boolean) = if (succeed) SummonerBriefInfo(

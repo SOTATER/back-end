@@ -68,8 +68,38 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SummonerLeagueBriefInfo'
+  /api/summoners/refresh/{summonerId}:
+    get:
+      summary: Get brief league information with summoner's id
+      operationId: leagueBrief
+      tags:
+        - summoners
+      parameters:
+        - name: summonerId
+          in: path
+          required: true
+          description: id to refresh
+          schema:
+            type: string
+      responses:
+        '200':
+          description: refresh call done
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GeneralResponse/BooleanResponse'
 components:
   schemas:
+    GeneralResponse:
+      BooleanResponse:
+        required:
+          - id
+          - result
+        properties:
+          id:
+            type: string
+          result:
+            type: boolean
     SummonerBriefInfo:
       required:
         - id
