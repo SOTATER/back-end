@@ -34,7 +34,7 @@ create table if not exists league_summoner (
   fresh_blood boolean not null,
   inactive boolean not null,
   veteran boolean not null,
-  loses integer not null,
+  losses integer not null,
   wins integer not null,
   rank rank not null,
   league_points integer not null,

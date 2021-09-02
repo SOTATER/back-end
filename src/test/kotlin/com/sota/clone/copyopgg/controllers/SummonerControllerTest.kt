@@ -128,16 +128,62 @@ class SummonerControllerTest {
     }
 
     @Test
-    fun testRefresh() {
+    fun testRefreshDone() {
         // given
         // match db sync 콜
         // league db sync 콜
+        every { leagueRepository.syncLeague(any<League>()) } just runs
         // league_summoner db sync 콜
+        every { leagueSummonerRepository.syncLeagueSummoner(any<LeagueSummoner>()) } just runs
+        // riot api 콜
+        every { riotApiController.getLeague(any<String>()) } returns this.getLeague()
+        every { riotApiController.getLeagueSummoner(any<String>()) } returns this.getLeagueSummoner()
 
         // when
         // refresh function 콜
+        assert(summonerController.refresh("tester") == ResponseEntity.ok().body(BooleanResponse("tester", true)))
 
         // verify
+        verifySequence {
+            riotApiController.getLeagueSummoner(any<String>())
+            riotApiController.getLeague(any<String>())
+            leagueSummonerRepository.syncLeagueSummoner(any<LeagueSummoner>())
+            leagueRepository.syncLeague(any<League>())
+        }
+        verify(exactly = 1) {
+            riotApiController.getLeagueSummoner(any<String>())
+            riotApiController.getLeague(any<String>())
+            leagueSummonerRepository.syncLeagueSummoner(any<LeagueSummoner>())
+            leagueRepository.syncLeague(any<League>())
+        }
+    }
+
+    @Test
+    fun testRefreshFailed() {
+        // given
+        // match db sync 콜
+        // league db sync 콜
+        every { leagueRepository.syncLeague(any<League>()) } just runs
+        // league_summoner db sync 콜
+        every { leagueSummonerRepository.syncLeagueSummoner(any<LeagueSummoner>()) } just runs
+        // riot api 콜
+        every { riotApiController.getLeague(any<String>()) } returns null
+        every { riotApiController.getLeagueSummoner(any<String>()) } returns this.getLeagueSummoner()
+
+        // when
+        // refresh function 콜
+        assert(summonerController.refresh("tester") == ResponseEntity.ok().body(BooleanResponse("tester", false)))
+
+        // verify
+        verify(exactly = 1) {
+            riotApiController.getLeagueSummoner(any<String>())
+            riotApiController.getLeague(any<String>())
+        }
+
+        verify(exactly = 0) {
+            leagueSummonerRepository.syncLeagueSummoner(any<LeagueSummoner>())
+            leagueRepository.syncLeague(any<League>())
+        }
     }
 
     private fun getSummonerBriefInfo(succeed: Boolean) = if (succeed) SummonerBriefInfo(
@@ -170,7 +216,7 @@ class SummonerControllerTest {
         leaguePoints = 1234,
         rank = Rank.I,
         wins = 1234,
-        loses = 1234,
+        losses = 1234,
         veteran = true,
         inactive = false,
         freshBlood = true,

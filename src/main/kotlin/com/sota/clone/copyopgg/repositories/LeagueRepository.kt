@@ -12,6 +12,8 @@ import java.sql.ResultSet
 interface LeagueRepository {
     fun insertLeague(league: League): Int
     fun insertLeagues(leagues: List<League>)
+    fun updateLeagueById(league: League)
+    fun syncLeague(league: League)
     fun findLeagueById(leagueId: String): League?
     fun existsLeagueById(leagueId: String): Boolean
 }
@@ -24,13 +26,13 @@ class JdbcLeagueRepository(
 
     val insertLeagueSql =
         "INSERT INTO leagues (\"league_id\", \"tier\", \"queue\", \"name\")\n" +
-                "VALUES (?, ?::tier, ?::rank, ?::queue)"
-
+                "VALUES (?, ?::tier, ?::queue, ?)"
     val selectLeagueSql =
         "SELECT * FROM leagues WHERE \"league_id\" = ?"
-
     val existsLeagueSql =
         "SELECT count(*) FROM leagues WHERE \"league_id\" = ?"
+    val updateLeagueByIdSql =
+        "UPDATE leagues SET (tier, queue, name)=(?::tier, ?::queue, ?) where league_id=?"
 
     override fun insertLeague(league: League): Int {
         println("tier is [${league.tier}]")
@@ -58,6 +60,24 @@ class JdbcLeagueRepository(
             }
         })
         logger.info("$rows rows are inserted into leagues table")
+    }
+
+    override fun updateLeagueById(league: League) {
+        jdbc.update(
+            updateLeagueByIdSql,
+            league.tier.toString(),
+            league.queue.toString(),
+            league.name,
+            league.leagueId,
+        )
+    }
+
+    override fun syncLeague(league: League) {
+        if (existsLeagueById(league.leagueId)) {
+            this.updateLeagueById(league)
+        } else {
+            this.insertLeague(league)
+        }
     }
 
     override fun findLeagueById(leagueId: String): League? {

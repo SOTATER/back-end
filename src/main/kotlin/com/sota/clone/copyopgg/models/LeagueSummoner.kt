@@ -6,7 +6,7 @@ data class LeagueSummoner(
     val leaguePoints: Int,
     val rank: Rank,
     val wins: Int,
-    val loses: Int,
+    val losses: Int,
     val veteran: Boolean,
     val inactive: Boolean,
     val freshBlood: Boolean,

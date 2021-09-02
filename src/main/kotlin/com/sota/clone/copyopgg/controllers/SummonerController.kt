@@ -15,6 +15,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.client.RestTemplate
+import java.lang.Exception
 import java.util.*
 
 @RestController
@@ -23,7 +24,7 @@ class SummonerController(
     @Autowired val summonerRepo: SummonerRepository,
     @Autowired val leagueRepo: LeagueRepository,
     @Autowired val leagueSummonerRepo: LeagueSummonerRepository,
-    val riotApiController: RiotApiController,
+    @Autowired val riotApiController: RiotApiController,
 ) {
     val logger: Logger = LoggerFactory.getLogger(SummonerController::class.java)
 
@@ -77,7 +78,7 @@ class SummonerController(
                     LeagueBriefInfoBySummoner(
                         tier = league.tier,
                         wins = leagueSummoner.wins,
-                        loses = leagueSummoner.loses,
+                        loses = leagueSummoner.losses,
                         leaguePoints = leagueSummoner.leaguePoints,
                         leagueName = league.name,
                         rank = leagueSummoner.rank
@@ -90,7 +91,19 @@ class SummonerController(
     @GetMapping("/refresh/{summonerId}")
     fun refresh(@PathVariable(name = "summonerId", required = true) summonerId: String): ResponseEntity<BooleanResponse> {
         logger.info("Synchronize data of summoner has id $summonerId")
-        return ResponseEntity.notFound().build()
+        val result = this.riotApiController.getLeagueSummoner(summonerId)?.let { leagueSummoner ->
+            this.riotApiController.getLeague(leagueSummoner.leagueId)?.let { league ->
+                this.leagueSummonerRepo.syncLeagueSummoner(leagueSummoner)
+                this.leagueRepo.syncLeague(league)
+                true
+            } ?: false
+        } ?: false
+        return ResponseEntity.ok().body(
+            BooleanResponse(
+                id = summonerId,
+                result = result
+            )
+        )
     }
 }
 
