@@ -48,6 +48,26 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SummonerBriefInfo'
+  /api/summoners/league/brief/{searchId}:
+    get:
+      summary: Get brief league information with summoner's id
+      operationId: leagueBrief
+      tags:
+        - summoners
+      parameters:
+        - name: searchId
+          in: path
+          required: true
+          description: id to search
+          schema:
+            type: string
+      responses:
+        '200':
+          description: summoner brief league information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SummonerLeagueBriefInfo'
 components:
   schemas:
     SummonerBriefInfo:
@@ -82,9 +102,36 @@ components:
         leaguePoints:
           type: integer
           format: int32
+    SummonerLeagueBriefInfo:
+      required:
+        - leaguePoints
+        - wins
+        - loses
+        - tier
+        - rank
+        - leagueName
+      properties:
+        wins:
+          type: integer
+          format: int32
+        loses:
+          type: integer
+          format: int32
+        tier:
+          $ref: '#/components/schemas/Tier'
+        rank:
+          $ref: '#/components/schemas/Rank'
+        leaguePoints:
+          type: integer
+          format: int32
+        leagueName:
+          type: string
     Tier:
       type: string
       enum:
+        - CHALLENGER
+        - GRANDMASTER
+        - MASTER
         - DIAMOND
         - PLATINUM
         - GOLD

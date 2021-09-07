@@ -5,6 +5,8 @@ import com.merakianalytics.orianna.types.common.Region
 import com.merakianalytics.orianna.types.core.summoner.Summoner
 import com.sota.clone.copyopgg.models.*
 import com.sota.clone.copyopgg.repositories.JdbcSummonerRepository
+import com.sota.clone.copyopgg.repositories.LeagueRepository
+import com.sota.clone.copyopgg.repositories.LeagueSummonerRepository
 import com.sota.clone.copyopgg.repositories.SummonerRepository
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -18,7 +20,9 @@ import java.util.*
 @RestController
 @RequestMapping("/api/summoners")
 class SummonerController(
-    @Autowired val summonerRepo: SummonerRepository
+    @Autowired val summonerRepo: SummonerRepository,
+    @Autowired val leagueRepo: LeagueRepository,
+    @Autowired val leagueSummonerRepo: LeagueSummonerRepository
 ) {
 
     val logger: Logger = LoggerFactory.getLogger(SummonerController::class.java)
@@ -74,59 +78,28 @@ class SummonerController(
         } ?: null
     }
 
-    //테스트용
-    //DB에 데이터 넣는 용도
-    fun loadSummonersFromRiotApi() {
-        val apiKey = ""
-        val template = RestTemplate()
-        val response = template.getForEntity(
-            "https://kr.api.riotgames.com/lol/league/v4/entries/RANKED_SOLO_5x5/DIAMOND/I?page=2&api_key=$apiKey",
-            Array<SummonerLeagueDTO>::class.java
-        )
-        val summoners = response.body!!
-
-        var count = 0
-        var index = 0
-        while (count < 30) {
-            val summoner = summoners[index]
-            val leagueId = summoner.leagueId
-            if (!summonerRepo.existsLeagueById(leagueId)) {
-                println(summoner.queueType)
-                println(summoner.tier)
-                val rowNum = summonerRepo.insertLeague(
-                    League(
-                        leagueId,
-                        Tier.valueOf(summoner.tier),
-                        Rank.valueOf(summoner.rank),
-                        QueueType.valueOf(summoner.queueType)
+    @GetMapping("/league/brief/{searchId}")
+    fun getBriefLeagueInfo(
+        @PathVariable(
+            name = "searchId",
+            required = true
+        ) searchId: String
+    ): ResponseEntity<LeagueBriefInfoBySummoner> {
+        logger.info("Get league brief information with summoner id: $searchId")
+        return this.leagueSummonerRepo.getLeagueSummonerBySummonerId(searchId)?.let { leagueSummoner ->
+            this.leagueRepo.findLeagueById(leagueSummoner.leagueId)?.let { league ->
+                ResponseEntity.ok().body(
+                    LeagueBriefInfoBySummoner(
+                        tier = league.tier,
+                        wins = leagueSummoner.wins,
+                        loses = leagueSummoner.loses,
+                        leaguePoints = leagueSummoner.leaguePoints,
+                        leagueName = league.name,
+                        rank = leagueSummoner.rank
                     )
                 )
-                if (rowNum == 1) {
-                    logger.info("league $leagueId inserted to table \"leagues\"")
-                }
-            }
-            val infoResponse = template.getForEntity(
-                "https://kr.api.riotgames.com/lol/summoner/v4/summoners/${summoner.summonerId}?api_key=$apiKey",
-                SummonerDTO::class.java
-            )
-            summonerRepo.insertSummoner(infoResponse.body!!)
-
-            summonerRepo.insertLeagueSummoner(
-                LeagueSummoner(
-                    summonerId = summoner.summonerId,
-                    leagueId = leagueId,
-                    leaguePoints = summoner.leaguePoints,
-                    wins = summoner.wins,
-                    loses = summoner.losses,
-                    veteran = summoner.veteran,
-                    inactive = summoner.inactive,
-                    freshBlood = summoner.freshBlood,
-                    hotStreak = summoner.hotStreak
-                )
-            )
-            count++
-            index++
-        }
+            } ?: ResponseEntity.notFound().build()
+        } ?: ResponseEntity.notFound().build()
     }
 }
 
