@@ -15,6 +15,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.client.RestTemplate
+import java.lang.Exception
 import java.util.*
 
 @RestController
@@ -22,9 +23,9 @@ import java.util.*
 class SummonerController(
     @Autowired val summonerRepo: SummonerRepository,
     @Autowired val leagueRepo: LeagueRepository,
-    @Autowired val leagueSummonerRepo: LeagueSummonerRepository
+    @Autowired val leagueSummonerRepo: LeagueSummonerRepository,
+    @Autowired val riotApiController: RiotApiController,
 ) {
-
     val logger: Logger = LoggerFactory.getLogger(SummonerController::class.java)
 
     @GetMapping("/search/auto-complete/{searchWord}")
@@ -49,7 +50,7 @@ class SummonerController(
         val result = summonerRepo.searchByName(searchWord)
         return result?.let {
             ResponseEntity.ok().body(it)
-        } ?: this.getSummonerViaRiotApi(searchWord)?.let {
+        } ?: this.riotApiController.getSummoner(searchWord)?.let {
             summonerRepo.insertSummoner(it)
             ResponseEntity.ok().body(
                 SummonerBriefInfo(
@@ -61,21 +62,6 @@ class SummonerController(
                 )
             )
         } ?: ResponseEntity.notFound().build()
-    }
-
-    fun getSummonerViaRiotApi(searchWord: String): SummonerDTO? {
-        val fromOrianna = Orianna.summonerNamed(searchWord).withRegion(Region.KOREA).get()
-        return fromOrianna.puuid?.let {
-            SummonerDTO(
-                accountId = fromOrianna.accountId,
-                puuid = fromOrianna.puuid,
-                id = fromOrianna.id,
-                name = fromOrianna.name,
-                summonerLevel = fromOrianna.level.toLong(),
-                profileIconId = fromOrianna.profileIcon.id,
-                revisionDate = fromOrianna.updated.millis
-            )
-        } ?: null
     }
 
     @GetMapping("/league/brief/{searchId}")
@@ -92,7 +78,7 @@ class SummonerController(
                     LeagueBriefInfoBySummoner(
                         tier = league.tier,
                         wins = leagueSummoner.wins,
-                        loses = leagueSummoner.loses,
+                        loses = leagueSummoner.losses,
                         leaguePoints = leagueSummoner.leaguePoints,
                         leagueName = league.name,
                         rank = leagueSummoner.rank
@@ -100,6 +86,24 @@ class SummonerController(
                 )
             } ?: ResponseEntity.notFound().build()
         } ?: ResponseEntity.notFound().build()
+    }
+
+    @GetMapping("/refresh/{summonerId}")
+    fun refresh(@PathVariable(name = "summonerId", required = true) summonerId: String): ResponseEntity<BooleanResponse> {
+        logger.info("Synchronize data of summoner has id $summonerId")
+        val result = this.riotApiController.getLeagueSummoner(summonerId)?.let { leagueSummoner ->
+            this.riotApiController.getLeague(leagueSummoner.leagueId)?.let { league ->
+                this.leagueSummonerRepo.syncLeagueSummoner(leagueSummoner)
+                this.leagueRepo.syncLeague(league)
+                true
+            } ?: false
+        } ?: false
+        return ResponseEntity.ok().body(
+            BooleanResponse(
+                id = summonerId,
+                result = result
+            )
+        )
     }
 }
 

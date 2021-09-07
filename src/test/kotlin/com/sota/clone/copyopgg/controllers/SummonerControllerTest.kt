@@ -25,6 +25,9 @@ class SummonerControllerTest {
     @MockK
     private lateinit var leagueRepository: LeagueRepository
 
+    @MockK
+    private lateinit var riotApiController: RiotApiController
+
     @InjectMockKs
     @SpyK
     private lateinit var summonerController: SummonerController
@@ -57,7 +60,7 @@ class SummonerControllerTest {
         // Summoner Repository에서 db에 데이터가 없으므로 null 리턴
         every { summonerRepository.searchByName(any<String>()) } returns null
         // db에 데이터가 없으므로, riot api를 통해 summoner 데이터 get
-        every { summonerController.getSummonerViaRiotApi(any<String>()) } returns this.getSummonerDTO()
+        every { riotApiController.getSummoner(any<String>()) } returns this.getSummonerDTO()
         // get한 summoner data는 db에 insert
         every { summonerRepository.insertSummoner(any<SummonerDTO>()) } just Runs
 
@@ -69,7 +72,7 @@ class SummonerControllerTest {
         // verify
         verify {
             // riot api 호출 검증
-            summonerController.getSummonerViaRiotApi(any<String>())
+            riotApiController.getSummoner(any<String>())
             // db insert api 호출 검증
             summonerRepository.insertSummoner(any<SummonerDTO>())
         }
@@ -81,7 +84,7 @@ class SummonerControllerTest {
         // db에 데이터가 없으므로 null 리턴
         every { summonerRepository.searchByName(any<String>()) } returns null
         // riot api로부터도 데이터가 없으므로 null 리턴
-        every { summonerController.getSummonerViaRiotApi(any<String>()) } returns null
+        every { riotApiController.getSummoner(any<String>()) } returns null
 
         // verify
         // getSummonerInfo API에서 빈 결과 리턴 검증
@@ -124,6 +127,65 @@ class SummonerControllerTest {
         }
     }
 
+    @Test
+    fun testRefreshDone() {
+        // given
+        // match db sync 콜
+        // league db sync 콜
+        every { leagueRepository.syncLeague(any<League>()) } just runs
+        // league_summoner db sync 콜
+        every { leagueSummonerRepository.syncLeagueSummoner(any<LeagueSummoner>()) } just runs
+        // riot api 콜
+        every { riotApiController.getLeague(any<String>()) } returns this.getLeague()
+        every { riotApiController.getLeagueSummoner(any<String>()) } returns this.getLeagueSummoner()
+
+        // when
+        // refresh function 콜
+        assert(summonerController.refresh("tester") == ResponseEntity.ok().body(BooleanResponse("tester", true)))
+
+        // verify
+        verifySequence {
+            riotApiController.getLeagueSummoner(any<String>())
+            riotApiController.getLeague(any<String>())
+            leagueSummonerRepository.syncLeagueSummoner(any<LeagueSummoner>())
+            leagueRepository.syncLeague(any<League>())
+        }
+        verify(exactly = 1) {
+            riotApiController.getLeagueSummoner(any<String>())
+            riotApiController.getLeague(any<String>())
+            leagueSummonerRepository.syncLeagueSummoner(any<LeagueSummoner>())
+            leagueRepository.syncLeague(any<League>())
+        }
+    }
+
+    @Test
+    fun testRefreshFailed() {
+        // given
+        // match db sync 콜
+        // league db sync 콜
+        every { leagueRepository.syncLeague(any<League>()) } just runs
+        // league_summoner db sync 콜
+        every { leagueSummonerRepository.syncLeagueSummoner(any<LeagueSummoner>()) } just runs
+        // riot api 콜
+        every { riotApiController.getLeague(any<String>()) } returns null
+        every { riotApiController.getLeagueSummoner(any<String>()) } returns this.getLeagueSummoner()
+
+        // when
+        // refresh function 콜
+        assert(summonerController.refresh("tester") == ResponseEntity.ok().body(BooleanResponse("tester", false)))
+
+        // verify
+        verify(exactly = 1) {
+            riotApiController.getLeagueSummoner(any<String>())
+            riotApiController.getLeague(any<String>())
+        }
+
+        verify(exactly = 0) {
+            leagueSummonerRepository.syncLeagueSummoner(any<LeagueSummoner>())
+            leagueRepository.syncLeague(any<League>())
+        }
+    }
+
     private fun getSummonerBriefInfo(succeed: Boolean) = if (succeed) SummonerBriefInfo(
         id = "test_id",
         name = "tester",
@@ -154,7 +216,7 @@ class SummonerControllerTest {
         leaguePoints = 1234,
         rank = Rank.I,
         wins = 1234,
-        loses = 1234,
+        losses = 1234,
         veteran = true,
         inactive = false,
         freshBlood = true,
