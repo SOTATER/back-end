@@ -54,7 +54,6 @@ class JdbcSummonerRepository(
     }
 
     override fun searchFiveRowsByName(searchWord: String): Iterable<SummonerBriefInfo> {
-        val result = mutableListOf<SummonerBriefInfo>()
         return jdbc.query(
             this.selectFiveSummonerBriefInfoSql,
             this::mapToSummonerBriefInfo,
