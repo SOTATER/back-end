@@ -17,19 +17,16 @@ class RiotApiService {
     val restTemplate = RestTemplate()
     val apiKey: String? = System.getenv("RIOT_API_KEY")
 
-    fun getSummoner(searchWord: String): SummonerDTO? {
-        val fromOrianna = Orianna.summonerNamed(searchWord).withRegion(Region.KOREA).get()
-        return fromOrianna.puuid?.let {
-            SummonerDTO(
-                accountId = fromOrianna.accountId,
-                puuid = fromOrianna.puuid,
-                id = fromOrianna.id,
-                name = fromOrianna.name,
-                summonerLevel = fromOrianna.level.toLong(),
-                profileIconId = fromOrianna.profileIcon.id,
-                revisionDate = fromOrianna.updated.millis
+    fun getSummoner(searchWord: String): SummonerDTO? = try {
+        apiKey?.run {
+            restTemplate.getForObject(
+                "$apiRootUrl/lol/summoner/v4/summoners/by-name/$searchWord?api_key=$this",
+                SummonerDTO::class.java
             )
         }
+    } catch (e: Exception) {
+        logger.error("error occurred when using riot api", e)
+        null
     }
 
     fun getLeague(leagueId: String): League? {
