@@ -1,6 +1,6 @@
 package com.sota.clone.copyopgg.utils
 
-import com.sota.clone.copyopgg.models.*
+import com.sota.clone.copyopgg.domain.models.*
 
 fun getSummonerDTO() = SummonerDTO(
     accountId = "1234",

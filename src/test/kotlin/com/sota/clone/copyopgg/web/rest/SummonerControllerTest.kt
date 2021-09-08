@@ -1,4 +1,4 @@
-package com.sota.clone.copyopgg.controllers
+package com.sota.clone.copyopgg.web.rest
 
 import com.sota.clone.copyopgg.domain.models.*
 import com.sota.clone.copyopgg.domain.repositories.LeagueRepository

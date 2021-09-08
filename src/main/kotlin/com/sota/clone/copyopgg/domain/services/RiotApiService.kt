@@ -1,11 +1,8 @@
 package com.sota.clone.copyopgg.domain.services
 
-import com.merakianalytics.orianna.Orianna
-import com.merakianalytics.orianna.types.common.Region
 import com.sota.clone.copyopgg.domain.models.*
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.stereotype.Controller
 import org.springframework.stereotype.Service
 import org.springframework.web.client.RestTemplate
 import java.lang.Exception
