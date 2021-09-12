@@ -7,6 +7,7 @@ import com.sota.clone.copyopgg.domain.repositories.LeagueRepository
 import com.sota.clone.copyopgg.domain.repositories.LeagueSummonerRepository
 import com.sota.clone.copyopgg.domain.repositories.SummonerRepository
 import com.sota.clone.copyopgg.domain.services.RiotApiService
+import io.swagger.annotations.ApiOperation
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -24,6 +25,7 @@ class SummonerController(
     val logger: Logger = LoggerFactory.getLogger(SummonerController::class.java)
 
     @GetMapping("/search/auto-complete/{searchWord}")
+    @ApiOperation(value = "get matched names")
     fun getMatchNames(
         @PathVariable(
             name = "searchWord",
