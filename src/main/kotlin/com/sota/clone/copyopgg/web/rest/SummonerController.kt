@@ -1,22 +1,17 @@
-package com.sota.clone.copyopgg.controllers
+package com.sota.clone.copyopgg.web.rest
 
-import com.merakianalytics.orianna.Orianna
-import com.merakianalytics.orianna.types.common.Region
-import com.merakianalytics.orianna.types.core.summoner.Summoner
-import com.sota.clone.copyopgg.models.*
-import com.sota.clone.copyopgg.repositories.JdbcSummonerRepository
-import com.sota.clone.copyopgg.repositories.LeagueRepository
-import com.sota.clone.copyopgg.repositories.LeagueSummonerRepository
-import com.sota.clone.copyopgg.repositories.SummonerRepository
+import com.sota.clone.copyopgg.domain.models.BooleanResponse
+import com.sota.clone.copyopgg.domain.models.LeagueBriefInfoBySummoner
+import com.sota.clone.copyopgg.domain.models.SummonerBriefInfo
+import com.sota.clone.copyopgg.domain.repositories.LeagueRepository
+import com.sota.clone.copyopgg.domain.repositories.LeagueSummonerRepository
+import com.sota.clone.copyopgg.domain.repositories.SummonerRepository
+import com.sota.clone.copyopgg.domain.services.RiotApiService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
-import org.springframework.web.client.RestTemplate
-import java.lang.Exception
-import java.util.*
 
 @RestController
 @RequestMapping("/api/summoners")
@@ -24,7 +19,7 @@ class SummonerController(
     @Autowired val summonerRepo: SummonerRepository,
     @Autowired val leagueRepo: LeagueRepository,
     @Autowired val leagueSummonerRepo: LeagueSummonerRepository,
-    @Autowired val riotApiController: RiotApiController,
+    @Autowired val riotApiController: RiotApiService
 ) {
     val logger: Logger = LoggerFactory.getLogger(SummonerController::class.java)
 

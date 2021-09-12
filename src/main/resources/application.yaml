@@ -3,3 +3,6 @@ spring:
     url: ${COPY_OPGG_DATASOURCE_URL}
     username: ${COPY_OPGG_DATASOURCE_USERNAME}
     password: ${COPY_OPGG_DATASOURCE_PASSWORD}
+
+api:
+  version: v1

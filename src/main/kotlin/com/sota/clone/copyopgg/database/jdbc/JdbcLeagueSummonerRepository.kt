@@ -1,20 +1,12 @@
-package com.sota.clone.copyopgg.repositories
+package com.sota.clone.copyopgg.database
 
-import com.sota.clone.copyopgg.models.*
+import com.sota.clone.copyopgg.domain.models.*
+import com.sota.clone.copyopgg.domain.repositories.LeagueSummonerRepository
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Repository
 import java.sql.ResultSet
-
-interface LeagueSummonerRepository {
-    fun existsLeagueSummonerBySummoner(summonerId: String): Boolean
-    fun insertLeagueSummoners(leagueSummoners: List<LeagueSummoner>)
-    fun insertLeagueSummoner(leagueSummoner: LeagueSummoner)
-    fun updateLeagueSummonerBySummoner(leagueSummoner: LeagueSummoner)
-    fun syncLeagueSummoner(leagueSummoner: LeagueSummoner)
-    fun getLeagueSummonerBySummonerId(summonerId: String): LeagueSummoner?
-}
 
 @Repository
 class JdbcLeagueSummonerRepository(

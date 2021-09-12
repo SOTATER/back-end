@@ -1,17 +1,18 @@
-package com.sota.clone.copyopgg.controllers
+package com.sota.clone.copyopgg.domain.services
 
 import com.merakianalytics.orianna.Orianna
 import com.merakianalytics.orianna.types.common.Region
-import com.sota.clone.copyopgg.models.*
+import com.sota.clone.copyopgg.domain.models.*
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Controller
+import org.springframework.stereotype.Service
 import org.springframework.web.client.RestTemplate
 import java.lang.Exception
 
-@Controller
-class RiotApiController {
-    val logger: Logger = LoggerFactory.getLogger(RiotApiController::class.java)
+@Service
+class RiotApiService {
+    val logger: Logger = LoggerFactory.getLogger(RiotApiService::class.java)
     val apiRootUrl = "https://kr.api.riotgames.com"
     val restTemplate = RestTemplate()
     val apiKey: String? = System.getenv("RIOT_API_KEY")

@@ -1,4 +1,4 @@
-package com.sota.clone.copyopgg.models
+package com.sota.clone.copyopgg.domain.models
 
 data class LeagueInfo(
     val leagueId: String,

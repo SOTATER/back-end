@@ -1,15 +1,19 @@
 package com.sota.clone.copyopgg.controllers
 
-import com.sota.clone.copyopgg.models.*
-import com.sota.clone.copyopgg.repositories.LeagueRepository
-import com.sota.clone.copyopgg.repositories.LeagueSummonerRepository
-import com.sota.clone.copyopgg.repositories.SummonerRepository
+import com.sota.clone.copyopgg.domain.models.*
+import com.sota.clone.copyopgg.domain.repositories.LeagueRepository
+import com.sota.clone.copyopgg.domain.repositories.LeagueSummonerRepository
+import com.sota.clone.copyopgg.domain.repositories.SummonerRepository
+import com.sota.clone.copyopgg.domain.services.RiotApiService
+import com.sota.clone.copyopgg.web.rest.SummonerController
 import io.mockk.*
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.impl.annotations.SpyK
 import io.mockk.junit5.MockKExtension
-import org.junit.jupiter.api.*
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -26,7 +30,7 @@ class SummonerControllerTest {
     private lateinit var leagueRepository: LeagueRepository
 
     @MockK
-    private lateinit var riotApiController: RiotApiController
+    private lateinit var riotApiController: RiotApiService
 
     @InjectMockKs
     @SpyK

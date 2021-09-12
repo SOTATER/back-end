@@ -1,6 +1,7 @@
-package com.sota.clone.copyopgg.repositories
+package com.sota.clone.copyopgg.database
 
-import com.sota.clone.copyopgg.models.*
+import com.sota.clone.copyopgg.domain.models.*
+import com.sota.clone.copyopgg.domain.repositories.LeagueRepository
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.BatchPreparedStatementSetter
@@ -8,15 +9,6 @@ import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Repository
 import java.sql.PreparedStatement
 import java.sql.ResultSet
-
-interface LeagueRepository {
-    fun insertLeague(league: League): Int
-    fun insertLeagues(leagues: List<League>)
-    fun updateLeagueById(league: League)
-    fun syncLeague(league: League)
-    fun findLeagueById(leagueId: String): League?
-    fun existsLeagueById(leagueId: String): Boolean
-}
 
 @Repository
 class JdbcLeagueRepository(
