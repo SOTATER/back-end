@@ -32,7 +32,7 @@ class SummonerControllerTest {
     private lateinit var leagueRepository: LeagueRepository
 
     @MockK
-    private lateinit var riotApiController: RiotApiService
+    private lateinit var riotApiService: RiotApiService
 
     @InjectMockKs
     @SpyK
@@ -53,11 +53,11 @@ class SummonerControllerTest {
     fun testGetSummonerInfoWhenSummonerInDB() {
         // given
         // Summoner Repository에서 db의 데이터를 리턴
-        every { summonerRepository.searchByName(any<String>()) } returns getSummonerBriefInfo()
+        every { summonerRepository.searchByName(any<String>()) } returns DummyObjectUtils.getSummonerBriefInfo()
 
         // verify
         // getSummonerInfo에서 db의 데이터로부터 결과값 리턴 검증
-        assert(summonerController.getSummonerInfo("tester") == ResponseEntity.ok().body(getSummonerBriefInfo()))
+        assert(summonerController.getSummonerInfo("tester") == ResponseEntity.ok().body(DummyObjectUtils.getSummonerBriefInfo()))
     }
 
     @Test
@@ -66,7 +66,7 @@ class SummonerControllerTest {
         // Summoner Repository에서 db에 데이터가 없으므로 null 리턴
         every { summonerRepository.searchByName(any<String>()) } returns null
         // db에 데이터가 없으므로, riot api를 통해 summoner 데이터 get
-        every { riotApiController.getSummoner(any<String>()) } returns getSummonerDTO()
+        every { riotApiService.getSummoner(any<String>()) } returns DummyObjectUtils.getSummonerDTO()
         // get한 summoner data는 db에 insert
         every { summonerRepository.insertSummoner(any<SummonerDTO>()) } just Runs
 
@@ -78,7 +78,7 @@ class SummonerControllerTest {
         // verify
         verify {
             // riot api 호출 검증
-            riotApiController.getSummoner(any<String>())
+            riotApiService.getSummoner(any<String>())
             // db insert api 호출 검증
             summonerRepository.insertSummoner(any<SummonerDTO>())
         }
@@ -90,7 +90,7 @@ class SummonerControllerTest {
         // db에 데이터가 없으므로 null 리턴
         every { summonerRepository.searchByName(any<String>()) } returns null
         // riot api로부터도 데이터가 없으므로 null 리턴
-        every { riotApiController.getSummoner(any<String>()) } returns null
+        every { riotApiService.getSummoner(any<String>()) } returns null
 
         // verify
         // getSummonerInfo API에서 빈 결과 리턴 검증
@@ -101,13 +101,13 @@ class SummonerControllerTest {
     fun testGetSummonerLeagueInfoInDB() {
         // given
         // LeagueSummoner repo에서 db에 있는 값 리턴
-        every { leagueSummonerRepository.getLeagueSummonerBySummonerId(any<String>()) } returns getLeagueSummoner()
+        every { leagueSummonerRepository.getLeagueSummonerBySummonerId(any<String>()) } returns DummyObjectUtils.getLeagueSummoner()
         // League repo에서 db에 있는 값 리턴
-        every { leagueRepository.findLeagueById(any<String>()) } returns getLeague()
+        every { leagueRepository.findLeagueById(any<String>()) } returns DummyObjectUtils.getLeague()
 
         // verify
         // getBriefLeagueInfo 결과값 리턴 검증
-        assert( summonerController.getBriefLeagueInfo("tester") == ResponseEntity.ok().body(getLeagueBriefInfo()))
+        assert( summonerController.getBriefLeagueInfo("tester") == ResponseEntity.ok().body(DummyObjectUtils.getLeagueBriefInfo()))
 
         // repo로부터 db 호출 검증
         verify {
@@ -121,7 +121,7 @@ class SummonerControllerTest {
         // given
         // db에 데이터가 없으므로 null 리턴
         every { leagueSummonerRepository.getLeagueSummonerBySummonerId(any<String>()) } returns null
-        every { leagueRepository.findLeagueById(any<String>()) } returns getLeague()
+        every { leagueRepository.findLeagueById(any<String>()) } returns DummyObjectUtils.getLeague()
 
         // verify
         // getBriefLeagueInfo에서 not found 리턴 (unranked) 처리
@@ -142,8 +142,8 @@ class SummonerControllerTest {
         // league_summoner db sync 콜
         every { leagueSummonerRepository.syncLeagueSummoner(any<LeagueSummoner>()) } just runs
         // riot api 콜
-        every { riotApiController.getLeague(any<String>()) } returns getLeague()
-        every { riotApiController.getLeagueSummoner(any<String>()) } returns getLeagueSummoner()
+        every { riotApiService.getLeague(any<String>()) } returns DummyObjectUtils.getLeague()
+        every { riotApiService.getLeagueSummoner(any<String>()) } returns DummyObjectUtils.getLeagueSummoner()
 
         // when
         // refresh function 콜
@@ -151,14 +151,14 @@ class SummonerControllerTest {
 
         // verify
         verifySequence {
-            riotApiController.getLeagueSummoner(any<String>())
-            riotApiController.getLeague(any<String>())
+            riotApiService.getLeagueSummoner(any<String>())
+            riotApiService.getLeague(any<String>())
             leagueSummonerRepository.syncLeagueSummoner(any<LeagueSummoner>())
             leagueRepository.syncLeague(any<League>())
         }
         verify(exactly = 1) {
-            riotApiController.getLeagueSummoner(any<String>())
-            riotApiController.getLeague(any<String>())
+            riotApiService.getLeagueSummoner(any<String>())
+            riotApiService.getLeague(any<String>())
             leagueSummonerRepository.syncLeagueSummoner(any<LeagueSummoner>())
             leagueRepository.syncLeague(any<League>())
         }
@@ -173,8 +173,8 @@ class SummonerControllerTest {
         // league_summoner db sync 콜
         every { leagueSummonerRepository.syncLeagueSummoner(any<LeagueSummoner>()) } just runs
         // riot api 콜
-        every { riotApiController.getLeague(any<String>()) } returns null
-        every { riotApiController.getLeagueSummoner(any<String>()) } returns getLeagueSummoner()
+        every { riotApiService.getLeague(any<String>()) } returns null
+        every { riotApiService.getLeagueSummoner(any<String>()) } returns DummyObjectUtils.getLeagueSummoner()
 
         // when
         // refresh function 콜
@@ -182,8 +182,8 @@ class SummonerControllerTest {
 
         // verify
         verify(exactly = 1) {
-            riotApiController.getLeagueSummoner(any<String>())
-            riotApiController.getLeague(any<String>())
+            riotApiService.getLeagueSummoner(any<String>())
+            riotApiService.getLeague(any<String>())
         }
 
         verify(exactly = 0) {
