@@ -1,22 +1,12 @@
-package com.sota.clone.copyopgg.repositories
+package com.sota.clone.copyopgg.database
 
-import com.sota.clone.copyopgg.models.*
+import com.sota.clone.copyopgg.domain.models.*
+import com.sota.clone.copyopgg.domain.repositories.SummonerRepository
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.jdbc.core.BatchPreparedStatementSetter
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Repository
-import java.sql.PreparedStatement
 import java.sql.ResultSet
-import java.sql.SQLException
-
-interface SummonerRepository {
-    fun findById(id: String): SummonerDTO?
-    fun searchByName(searchWord: String): SummonerBriefInfo?
-    fun insertSummoner(summoner: SummonerDTO)
-    fun searchFiveRowsByName(searchWord: String): Iterable<SummonerBriefInfo>
-    fun insertSummoners(summoners: List<SummonerDTO>)
-}
 
 @Repository
 class JdbcSummonerRepository(
@@ -47,7 +37,7 @@ class JdbcSummonerRepository(
     val findSummonerByIdSql = "select * from summoners where \"id\"=?"
 
     override fun insertSummoners(summoners: List<SummonerDTO>) {
-
+        
     }
 
     override fun insertSummoner(summoner: SummonerDTO) {
@@ -83,7 +73,7 @@ class JdbcSummonerRepository(
     }
 
     fun mapToSummonerBriefInfo(rs: ResultSet, rowNum: Int): SummonerBriefInfo {
-        val leagueInfo = if (columnExistsInResultSet(rs, "league_id")) {
+        val leagueInfo = if (RepositoryUtils.columnExistsInResultSet(rs, "league_id")) {
             val leagueId = rs.getString("league_id")
             if (leagueId == null) null
             else LeagueInfo(

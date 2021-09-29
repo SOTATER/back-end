@@ -1,4 +1,4 @@
-package com.sota.clone.copyopgg.models
+package com.sota.clone.copyopgg.domain.models
 
 // data class we can get from riot summoner api
 data class SummonerDTO(
