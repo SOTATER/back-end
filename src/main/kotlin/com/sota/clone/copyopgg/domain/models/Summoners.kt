@@ -1,22 +1,29 @@
 package com.sota.clone.copyopgg.domain.models
 
-// data class we can get from riot summoner api
-data class SummonerDTO(
-    val accountId: String,
-    val profileIconId: Int,
-    val revisionDate: Long,
-    val name: String,
-    val id: String,
-    val puuid: String,
-    val summonerLevel: Long
-)
+import com.sota.clone.copyopgg.web.dto.summoners.SummonerDTO
+import com.sota.clone.copyopgg.web.dto.summoners.SummonerInfoDTO
+import javax.persistence.Column
+import javax.persistence.Entity
+import javax.persistence.Id
+import javax.persistence.Table
 
-// data class for search-by-name api response
-data class SummonerBriefInfo(
-    val id: String,
-    val name: String,
-    val summonerLevel: Long,
+@Entity
+@Table(name="summoners")
+class Summoner(
+    @Id
+    @Column(name="puuid")
+    val puuid: String,
+    @Column(name="accountid")
+    val accountId: String,
+    @Column(name="profileiconid")
     val profileIconId: Int,
-    val leagueInfo: LeagueInfo?,
+    @Column(name="revisiondate")
+    val revisionDate: Long,
+    @Column(name="name")
+    val name: String,
+    @Column(name="id")
+    val id: String,
+    @Column(name="summonerlevel")
+    val summonerLevel: Long
 )
 
