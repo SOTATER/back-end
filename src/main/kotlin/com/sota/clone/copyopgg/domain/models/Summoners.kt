@@ -1,7 +1,5 @@
 package com.sota.clone.copyopgg.domain.models
 
-import com.sota.clone.copyopgg.web.dto.summoners.SummonerDTO
-import com.sota.clone.copyopgg.web.dto.summoners.SummonerInfoDTO
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.Id

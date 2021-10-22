@@ -3,7 +3,6 @@ package com.sota.clone.copyopgg.database
 import com.sota.clone.copyopgg.domain.models.*
 import com.sota.clone.copyopgg.domain.repositories.SummonerRepository
 import com.sota.clone.copyopgg.web.dto.summoners.SummonerDTO
-import com.sota.clone.copyopgg.web.dto.summoners.SummonerInfoDTO
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.JdbcTemplate
@@ -51,7 +50,7 @@ class JdbcSummonerRepository(
         )
     }
 
-    fun searchFiveRowsByName(searchWord: String): Iterable<SummonerInfoDTO> {
+    fun searchFiveRowsByName(searchWord: String): Iterable<SummonerDTO> {
         return jdbc.query(
             this.selectFiveSummonerBriefInfoSql,
             this::mapToSummonerBriefInfo,
@@ -59,7 +58,7 @@ class JdbcSummonerRepository(
         )
     }
 
-    fun searchByName(searchWord: String): SummonerInfoDTO? {
+    fun searchByName(searchWord: String): SummonerDTO? {
         val result = jdbc.query(selectSummonerByNameSql, this::mapToSummonerBriefInfo, "$searchWord")
 
         return if (result.size == 1) result[0] else null
@@ -69,7 +68,7 @@ class JdbcSummonerRepository(
         return jdbc.queryForObject<SummonerDTO>(findSummonerByIdSql, this::mapToSummonerDTO, id)
     }
 
-    fun mapToSummonerBriefInfo(rs: ResultSet, rowNum: Int): SummonerInfoDTO {
+    fun mapToSummonerBriefInfo(rs: ResultSet, rowNum: Int): SummonerDTO {
         val leagueInfo = if (RepositoryUtils.columnExistsInResultSet(rs, "league_id")) {
             val leagueId = rs.getString("league_id")
             if (leagueId == null) null
@@ -81,12 +80,14 @@ class JdbcSummonerRepository(
             )
         } else null
 
-        return SummonerInfoDTO(
-            rs.getString("id"),
-            rs.getString("name"),
-            rs.getLong("summonerlevel"),
-            rs.getInt("profileiconid"),
-            leagueInfo
+        return SummonerDTO(
+            puuid = rs.getString("id"),
+            name = rs.getString("name"),
+            summonerLevel = rs.getLong("summonerlevel"),
+            profileIconId = rs.getInt("profileiconid"),
+            revisionDate = null,
+            accountId = null,
+            id = null
         )
     }
 

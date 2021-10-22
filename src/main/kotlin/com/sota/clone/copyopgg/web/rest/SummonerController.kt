@@ -5,8 +5,8 @@ import com.sota.clone.copyopgg.domain.models.LeagueBriefInfoBySummoner
 import com.sota.clone.copyopgg.domain.repositories.LeagueRepository
 import com.sota.clone.copyopgg.domain.repositories.LeagueSummonerRepository
 import com.sota.clone.copyopgg.domain.services.RiotApiService
-import com.sota.clone.copyopgg.web.dto.summoners.SummonerInfoDTO
-import com.sota.clone.copyopgg.web.services.SummonerService
+import com.sota.clone.copyopgg.domain.services.SummonerService
+import com.sota.clone.copyopgg.web.dto.summoners.SummonerDTO
 import io.swagger.annotations.ApiOperation
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -31,15 +31,15 @@ class SummonerController(
             name = "searchWord",
             required = true
         ) searchWord: String
-    ): Iterable<SummonerInfoDTO> {
+    ): Iterable<Map<String, Any?>> {
         logger.info("Searching for summoner names that start with '$searchWord'")
         return this.summonerService.getFiveSummonersMatchedPartialName(searchWord).map {
-            SummonerInfoDTO(
-                id = it.puuid,
-                name = it.name,
-                summonerLevel = it.summonerLevel,
-                profileIconId = it.profileIconId,
-                leagueInfo = null
+            mapOf(
+                "id" to it.puuid,
+                "name" to it.name,
+                "profileIconId" to it.profileIconId,
+                "summonerLevel" to it.summonerLevel,
+                "leagueInfo" to null
             )
         }
     }
@@ -50,17 +50,18 @@ class SummonerController(
             name = "searchWord",
             required = true
         ) searchWord: String
-    ): ResponseEntity<SummonerInfoDTO> {
+    ): ResponseEntity<Map<String, Any?>> {
         logger.info("Searching for summoner information named '$searchWord'")
         return this.summonerService.getSummonerByName(searchWord)?.let {
             ResponseEntity.ok().body(
-                SummonerInfoDTO(
-                    id = it.id,
-                    name = it.name,
-                    profileIconId = it.profileIconId,
-                    summonerLevel = it.summonerLevel,
-                    leagueInfo = null
-                ))
+                mapOf(
+                    "id" to it.puuid,
+                    "name" to it.name,
+                    "profileIconId" to it.profileIconId,
+                    "summonerLevel" to it.summonerLevel,
+                    "leagueInfo" to null
+                )
+            )
         } ?: ResponseEntity.notFound().build()
     }
 
@@ -106,20 +107,4 @@ class SummonerController(
         )
     }
 }
-
-data class SummonerLeagueDTO(
-    val leagueId: String,
-    val queueType: String,
-    val tier: String,
-    val rank: String,
-    val summonerId: String,
-    val summonerName: String,
-    val leaguePoints: Int,
-    val wins: Int,
-    val losses: Int,
-    val veteran: Boolean,
-    val inactive: Boolean,
-    val freshBlood: Boolean,
-    val hotStreak: Boolean
-)
 
