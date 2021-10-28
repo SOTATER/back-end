@@ -40,7 +40,7 @@ create table if not exists league_summoner (
   league_points integer not null,
   league_id char(36) not null,
   summoner_id varchar(63) not null,
-  primary key("summoner_id")
+  primary key ("league_id", "summoner_id")
 );
 
 create table if not exists matches (

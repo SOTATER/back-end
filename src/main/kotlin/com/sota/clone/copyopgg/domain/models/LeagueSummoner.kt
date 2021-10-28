@@ -20,4 +20,5 @@ data class LeagueBriefInfoBySummoner(
     val tier: Tier?,
     val rank: Rank?,
     val leagueName: String,
+    val queueType: String,
 )

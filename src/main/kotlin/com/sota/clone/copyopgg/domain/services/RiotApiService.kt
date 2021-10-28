@@ -40,15 +40,13 @@ class RiotApiService {
         }
     }
 
-    fun getLeagueSummoner(summonerId: String): LeagueSummoner? {
+    fun getLeagueSummoner(summonerId: String): Array<LeagueSummoner>? {
         return try {
             apiKey?.run {
                 restTemplate.getForObject(
                     "$apiRootUrl/lol/league/v4/entries/by-summoner/$summonerId?api_key=$this",
                     Array<LeagueSummoner>::class.java
-                )?.run {
-                    this[0]
-                }
+                )
             }
         } catch (e: Exception) {
             logger.error("error occurred when using riot api", e)
