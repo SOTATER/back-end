@@ -6,6 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository
 interface SummonerRepository {
     fun save(summoner: Summoner)
     fun findByName(name: String): Summoner?
-    fun findSummonersByPartialName(partialName: String): List<Summoner>
+    fun findSummonersByPartialName(partialName: String, size: Int): List<Summoner>
 }
 

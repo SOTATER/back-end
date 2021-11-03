@@ -37,7 +37,10 @@ class JpaSummonerRepository(
         }
     }
 
-    override fun findSummonersByPartialName(partialName: String): List<Summoner> {
+    override fun findSummonersByPartialName(partialName: String, size: Int): List<Summoner> {
+        if (size > 20) {
+            throw IllegalArgumentException("Too many size to find summoner")
+        }
         logger.info("findSummonersByPartialName called on partial name=$partialName")
         val query = entityManager.createQuery(
             "select s from Summoner s where " +
@@ -46,7 +49,7 @@ class JpaSummonerRepository(
             Summoner::class.java
         )
         query.setParameter("partialName", partialName)
-        query.maxResults = 10
+        query.maxResults = size
         return query.resultList
     }
 }

@@ -16,10 +16,7 @@ class SummonerService(
 
     fun getFiveSummonersMatchedPartialName(partialName: String): List<SummonerDTO> {
         logger.info("getFiveSummonersMatchedPartialName called")
-        var list = this.repo.findSummonersByPartialName(partialName)
-        if(list.size > 5) {
-            list = list.subList(0, 5)
-        }
+        var list = this.repo.findSummonersByPartialName(partialName, 5)
         return list.map {
             SummonerDTO(
                 accountId = it.accountId,
