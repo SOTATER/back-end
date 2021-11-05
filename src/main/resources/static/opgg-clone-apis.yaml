@@ -50,9 +50,29 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SummonerBriefInfo'
-  /api/summoners/league/brief/{searchId}:
+  /api/summoners/league/solo/{searchId}:
     get:
-      summary: Get brief league information with summoner's id
+      summary: Get solo league information with summoner's id
+      operationId: leagueBrief
+      tags:
+        - summoners
+      parameters:
+        - name: searchId
+          in: path
+          required: true
+          description: id to search
+          schema:
+            type: string
+      responses:
+        '200':
+          description: summoner brief league information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SummonerLeagueBriefInfo'
+  /api/summoners/league/flex/{searchId}:
+    get:
+      summary: Get flex league information with summoner's id
       operationId: leagueBrief
       tags:
         - summoners
@@ -138,6 +158,9 @@ components:
           format: int32
     SummonerLeagueBriefInfo:
       required:
+        - summonerId
+        - leagueId
+        - queue
         - leaguePoints
         - wins
         - loses
@@ -146,6 +169,12 @@ components:
         - leagueName
         - queueType
       properties:
+        summonerId:
+          type: string
+        leagueId:
+          type: string
+        queue:
+          $ref: '#/components/schemas/Queue'
         wins:
           type: integer
           format: int32

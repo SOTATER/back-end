@@ -11,7 +11,7 @@ import java.sql.ResultSet
 @Repository
 class JdbcLeagueSummonerRepository(
     @Autowired val jdbc: JdbcTemplate
-) : LeagueSummonerRepository {
+) {
     val logger = LoggerFactory.getLogger(LeagueSummonerRepository::class.java)
     val existsLeagueSummonerBySummonerSql =
         "SELECT count(*) FROM league_summoner WHERE summoner_id = ?"
@@ -26,19 +26,19 @@ class JdbcLeagueSummonerRepository(
         "UPDATE league_summoner SET (league_points, rank, wins, losses, veteran, inactive, fresh_blood, hot_streak)\n" +
                 "= (?,?::rank,?,?,?,?,?,?) where summoner_id = ? AND league_id = ?"
 
-    override fun existsLeagueSummonerBySummoner(summonerId: String): Boolean {
+    fun existsLeagueSummonerBySummoner(summonerId: String): Boolean {
         return jdbc.queryForObject(existsLeagueSummonerBySummonerSql, Integer::class.java, summonerId) > 0
     }
 
-    override fun existsLeagueSummonerBySummonerAndLeague(summonerId: String, leagueId: String): Boolean {
+    fun existsLeagueSummonerBySummonerAndLeague(summonerId: String, leagueId: String): Boolean {
         return jdbc.queryForObject(existsLeagueSummonerBySummonerAndLeagueSql, Integer::class.java, summonerId, leagueId) > 0
     }
 
-    override fun insertLeagueSummoners(leagueSummoners: List<LeagueSummoner>) {
+    fun insertLeagueSummoners(leagueSummoners: List<LeagueSummoner>) {
         TODO("Not yet implemented")
     }
 
-    override fun updateLeagueSummonerBySummoner(leagueSummoner: LeagueSummoner) {
+    fun updateLeagueSummonerBySummoner(leagueSummoner: LeagueSummoner) {
         jdbc.update(
             updateLeagueSummonerSql,
             leagueSummoner.leaguePoints,
@@ -54,7 +54,7 @@ class JdbcLeagueSummonerRepository(
         )
     }
 
-    override fun syncLeagueSummoner(leagueSummoner: LeagueSummoner) {
+    fun syncLeagueSummoner(leagueSummoner: LeagueSummoner) {
         if (this.existsLeagueSummonerBySummonerAndLeague(leagueSummoner.summonerId, leagueSummoner.leagueId)) {
             updateLeagueSummonerBySummoner(leagueSummoner)
         } else {
@@ -62,7 +62,7 @@ class JdbcLeagueSummonerRepository(
         }
     }
 
-    override fun insertLeagueSummoner(leagueSummoner: LeagueSummoner) {
+    fun insertLeagueSummoner(leagueSummoner: LeagueSummoner) {
         jdbc.update(
             insertLeagueSummonerSql,
             leagueSummoner.summonerId,
@@ -78,7 +78,7 @@ class JdbcLeagueSummonerRepository(
         )
     }
 
-    override fun getLeagueSummonerBySummonerId(summonerId: String): Array<LeagueSummoner> {
+    fun getLeagueSummonerBySummonerId(summonerId: String): Array<LeagueSummoner> {
         return if (this.existsLeagueSummonerBySummoner(summonerId)) {
             jdbc.query(selectLeagueSummonerSql, this::mapToLeagueSummoner, summonerId).toTypedArray()
         } else {
