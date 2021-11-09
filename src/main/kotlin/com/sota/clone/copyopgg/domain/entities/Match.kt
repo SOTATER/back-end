@@ -214,7 +214,7 @@ class MatchSummonerPerk : Serializable {
     var statPerksOffense: Int? = null
 
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "perks", cascade = [CascadeType.ALL])
-    private var styles: MutableList<MatchSummonerPerkStyle> = ArrayList()
+    var styles: MutableList<MatchSummonerPerkStyle> = ArrayList()
 
     fun addPerkStyle(perkStyle: MatchSummonerPerkStyle) {
         perkStyle.perks = this

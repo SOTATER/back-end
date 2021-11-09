@@ -9,5 +9,7 @@ interface MatchRepository {
 
     fun findLatest(): Match
 
+    fun findLatestMatchByPuuid(puuid: String): Match
+
     fun save(match: Match)
 }

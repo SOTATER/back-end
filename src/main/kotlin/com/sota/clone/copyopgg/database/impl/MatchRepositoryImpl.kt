@@ -13,7 +13,7 @@ import org.springframework.stereotype.Repository
 class MatchRepositoryImpl(
     @Autowired val jpaRepository: JpaMatchRepository,
     @Autowired val jdbc: JdbcTemplate
-): MatchRepository {
+) : MatchRepository {
 
     override fun findAll(): List<Match> {
         return this.jpaRepository.findAll()
@@ -21,6 +21,10 @@ class MatchRepositoryImpl(
 
     override fun findLatest(): Match {
         return Match()
+    }
+
+    override fun findLatestMatchByPuuid(puuid: String): Match {
+        return jpaRepository.findLatestMatchByPuuid(puuid)
     }
 
     override fun save(match: Match) {

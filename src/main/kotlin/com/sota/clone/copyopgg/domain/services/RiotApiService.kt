@@ -47,6 +47,7 @@ class RiotApiService(
 
     fun getMatchDetail(matchId: String): MatchDto? {
 
+        logger.info("Calling Riot API... GET match info")
         val headers = HttpHeaders()
         headers.set("X-Riot-Token", apiKey)
 
@@ -63,6 +64,7 @@ class RiotApiService(
 
     fun getMatchIdsByPuuid(puuid: String, params: MatchIdsParams): List<String> {
 
+        logger.info("Calling Riot API... GET matchIds by puuid")
         val headers = HttpHeaders()
         headers.set("X-Riot-Token", apiKey)
 
@@ -477,31 +479,7 @@ class RiotApiService(
     data class PerksDto(
         val statPerks: PerkStatsDto,
         val styles: List<PerkStyleDto>
-    ) {
-//        fun toPerks(): Perks {
-//            val result = Perks()
-//            val st = StatPerks()
-//            st.defense = this.statPerks.defense
-//            st.flex = this.statPerks.flex
-//            st.offense = this.statPerks.offense
-//            result.styles = List(styles.size) { i ->
-//                val s = PerkStyle()
-//                s.description = styles[i].description
-//                s.style = styles[i].style
-//                s.selections = List(styles[i].selections.size) { j ->
-//                    val sel = PerkSelection()
-//                    sel.perk = styles[i].selections[j].perk
-//                    sel.var1 = styles[i].selections[j].var1
-//                    sel.var2 = styles[i].selections[j].var2
-//                    sel.var3 = styles[i].selections[j].var3
-//                    sel
-//                }
-//                s
-//            }
-//            result.statPerks = st
-//            return result
-//        }
-    }
+    )
 
     data class PerkStatsDto(
         val defense: Int,

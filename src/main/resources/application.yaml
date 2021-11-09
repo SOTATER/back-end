@@ -5,7 +5,7 @@ spring:
     password: sotater123
 
 application:
-  riotApiKey: RGAPI-f9c89a73-074a-4cc6-88f7-324720b145d5
+  riotApiKey: RGAPI-e0b2c1f4-dc26-4d15-a7fc-6f0410b6146e
 
 api:
   version: v1

@@ -93,7 +93,8 @@ create table if not exists matches_teams (
     "rift_herald_kills" int not null,
     "tower_first" boolean not null,
     "tower_kills" int not null,
-    primary key("id")
+    primary key("id"),
+    unique ("match_id", "team_id")
 );
 
 create table if not exists matches_teams_ban_info (
@@ -119,7 +120,8 @@ create table if not exists matches_summoners (
     "team_early_surrendered" boolean not null,
     "team_id" int not null,
     "team_position" text not null,
-    primary key("id")
+    primary key("id"),
+    unique ("match_id", "puuid")
 );
 
 create table if not exists matches_summoners_champion (
