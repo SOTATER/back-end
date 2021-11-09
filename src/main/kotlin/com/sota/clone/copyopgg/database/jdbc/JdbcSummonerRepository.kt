@@ -2,6 +2,7 @@ package com.sota.clone.copyopgg.database
 
 import com.sota.clone.copyopgg.domain.models.*
 import com.sota.clone.copyopgg.domain.repositories.SummonerRepository
+import com.sota.clone.copyopgg.web.dto.summoners.SummonerDTO
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.JdbcTemplate
@@ -11,7 +12,7 @@ import java.sql.ResultSet
 @Repository
 class JdbcSummonerRepository(
     @Autowired val jdbc: JdbcTemplate
-) : SummonerRepository {
+) {
 
     val logger = LoggerFactory.getLogger(SummonerRepository::class.java)
 
@@ -36,11 +37,7 @@ class JdbcSummonerRepository(
 
     val findSummonerByIdSql = "select * from summoners where \"id\"=?"
 
-    override fun insertSummoners(summoners: List<SummonerDTO>) {
-        
-    }
-
-    override fun insertSummoner(summoner: SummonerDTO) {
+    fun insertSummoner(summoner: SummonerDTO) {
         jdbc.update(
             insertSummonerSql,
             summoner.accountId,
@@ -53,7 +50,7 @@ class JdbcSummonerRepository(
         )
     }
 
-    override fun searchFiveRowsByName(searchWord: String): Iterable<SummonerBriefInfo> {
+    fun searchFiveRowsByName(searchWord: String): Iterable<SummonerDTO> {
         return jdbc.query(
             this.selectFiveSummonerBriefInfoSql,
             this::mapToSummonerBriefInfo,
@@ -61,17 +58,17 @@ class JdbcSummonerRepository(
         )
     }
 
-    override fun searchByName(searchWord: String): SummonerBriefInfo? {
+    fun searchByName(searchWord: String): SummonerDTO? {
         val result = jdbc.query(selectSummonerByNameSql, this::mapToSummonerBriefInfo, "$searchWord")
 
         return if (result.size == 1) result[0] else null
     }
 
-    override fun findById(id: String): SummonerDTO? {
+    fun findById(id: String): SummonerDTO? {
         return jdbc.queryForObject<SummonerDTO>(findSummonerByIdSql, this::mapToSummonerDTO, id)
     }
 
-    fun mapToSummonerBriefInfo(rs: ResultSet, rowNum: Int): SummonerBriefInfo {
+    fun mapToSummonerBriefInfo(rs: ResultSet, rowNum: Int): SummonerDTO {
         val leagueInfo = if (RepositoryUtils.columnExistsInResultSet(rs, "league_id")) {
             val leagueId = rs.getString("league_id")
             if (leagueId == null) null
@@ -83,12 +80,14 @@ class JdbcSummonerRepository(
             )
         } else null
 
-        return SummonerBriefInfo(
-            rs.getString("id"),
-            rs.getString("name"),
-            rs.getLong("summonerlevel"),
-            rs.getInt("profileiconid"),
-            leagueInfo
+        return SummonerDTO(
+            puuid = rs.getString("id"),
+            name = rs.getString("name"),
+            summonerLevel = rs.getLong("summonerlevel"),
+            profileIconId = rs.getInt("profileiconid"),
+            revisionDate = null,
+            accountId = null,
+            id = null
         )
     }
 

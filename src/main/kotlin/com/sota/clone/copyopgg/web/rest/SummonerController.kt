@@ -2,11 +2,11 @@ package com.sota.clone.copyopgg.web.rest
 
 import com.sota.clone.copyopgg.domain.models.BooleanResponse
 import com.sota.clone.copyopgg.domain.models.LeagueBriefInfoBySummoner
-import com.sota.clone.copyopgg.domain.models.SummonerBriefInfo
 import com.sota.clone.copyopgg.domain.repositories.LeagueRepository
 import com.sota.clone.copyopgg.domain.repositories.LeagueSummonerRepository
-import com.sota.clone.copyopgg.domain.repositories.SummonerRepository
 import com.sota.clone.copyopgg.domain.services.RiotApiService
+import com.sota.clone.copyopgg.domain.services.SummonerService
+import com.sota.clone.copyopgg.web.dto.summoners.SummonerDTO
 import io.swagger.annotations.ApiOperation
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -17,10 +17,10 @@ import org.springframework.web.bind.annotation.*
 @RestController
 @RequestMapping("/api/summoners")
 class SummonerController(
-    @Autowired val summonerRepo: SummonerRepository,
     @Autowired val leagueRepo: LeagueRepository,
     @Autowired val leagueSummonerRepo: LeagueSummonerRepository,
-    @Autowired val riotApiController: RiotApiService
+    @Autowired val riotApiController: RiotApiService,
+    @Autowired val summonerService: SummonerService
 ) {
     val logger: Logger = LoggerFactory.getLogger(SummonerController::class.java)
 
@@ -31,9 +31,17 @@ class SummonerController(
             name = "searchWord",
             required = true
         ) searchWord: String
-    ): Iterable<SummonerBriefInfo> {
+    ): Iterable<Map<String, Any?>> {
         logger.info("Searching for summoner names that start with '$searchWord'")
-        return summonerRepo.searchFiveRowsByName(searchWord)
+        return this.summonerService.getFiveSummonersMatchedPartialName(searchWord).map {
+            mapOf(
+                "id" to it.puuid,
+                "name" to it.name,
+                "profileIconId" to it.profileIconId,
+                "summonerLevel" to it.summonerLevel,
+                "leagueInfo" to null
+            )
+        }
     }
 
     @GetMapping("/profile-info/{searchWord}")
@@ -42,20 +50,16 @@ class SummonerController(
             name = "searchWord",
             required = true
         ) searchWord: String
-    ): ResponseEntity<SummonerBriefInfo> {
+    ): ResponseEntity<Map<String, Any?>> {
         logger.info("Searching for summoner information named '$searchWord'")
-        val result = summonerRepo.searchByName(searchWord)
-        return result?.let {
-            ResponseEntity.ok().body(it)
-        } ?: this.riotApiController.getSummoner(searchWord)?.let {
-            summonerRepo.insertSummoner(it)
+        return this.summonerService.getSummonerByName(searchWord)?.let {
             ResponseEntity.ok().body(
-                SummonerBriefInfo(
-                    id = it.id,
-                    name = it.name,
-                    profileIconId = it.profileIconId,
-                    summonerLevel = it.summonerLevel,
-                    leagueInfo = null
+                mapOf(
+                    "id" to it.puuid,
+                    "name" to it.name,
+                    "profileIconId" to it.profileIconId,
+                    "summonerLevel" to it.summonerLevel,
+                    "leagueInfo" to null
                 )
             )
         } ?: ResponseEntity.notFound().build()
@@ -103,20 +107,4 @@ class SummonerController(
         )
     }
 }
-
-data class SummonerLeagueDTO(
-    val leagueId: String,
-    val queueType: String,
-    val tier: String,
-    val rank: String,
-    val summonerId: String,
-    val summonerName: String,
-    val leaguePoints: Int,
-    val wins: Int,
-    val losses: Int,
-    val veteran: Boolean,
-    val inactive: Boolean,
-    val freshBlood: Boolean,
-    val hotStreak: Boolean
-)
 
