@@ -5,8 +5,10 @@ info:
 servers:
   - url: 'http://34.69.171.78:80'
     description: 테스트용 GCP 서버
-  - url: 'http://192.168.9.63:8080'
+  - url: 'http://192.168.9.75:8080'
     description: geonho 테스트용 서버
+  - url: 'http://localhost:8080'
+    description: localhost 테스트 서버
 paths:
   /api/summoners/search/auto-complete/{searchWord}:
     get:

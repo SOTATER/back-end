@@ -1,12 +1,11 @@
 package com.sota.clone.copyopgg.domain.repositories
 
-import com.sota.clone.copyopgg.domain.models.SummonerBriefInfo
-import com.sota.clone.copyopgg.domain.models.SummonerDTO
+import com.sota.clone.copyopgg.domain.models.Summoner
+import org.springframework.data.jpa.repository.JpaRepository
 
 interface SummonerRepository {
-    fun findById(id: String): SummonerDTO?
-    fun searchByName(searchWord: String): SummonerBriefInfo?
-    fun insertSummoner(summoner: SummonerDTO)
-    fun searchFiveRowsByName(searchWord: String): Iterable<SummonerBriefInfo>
-    fun insertSummoners(summoners: List<SummonerDTO>)
+    fun save(summoner: Summoner)
+    fun findByName(name: String): Summoner?
+    fun findSummonersByPartialName(partialName: String, size: Int): List<Summoner>
 }
+

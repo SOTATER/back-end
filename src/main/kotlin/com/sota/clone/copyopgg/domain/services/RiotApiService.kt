@@ -1,6 +1,7 @@
 package com.sota.clone.copyopgg.domain.services
 
 import com.sota.clone.copyopgg.domain.models.*
+import com.sota.clone.copyopgg.web.dto.summoners.SummonerDTO
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -15,6 +16,7 @@ class RiotApiService {
     val apiKey: String? = System.getenv("RIOT_API_KEY")
 
     fun getSummoner(searchWord: String): SummonerDTO? = try {
+        logger.info("get summoner named $searchWord via riot api")
         apiKey?.run {
             restTemplate.getForObject(
                 "$apiRootUrl/lol/summoner/v4/summoners/by-name/$searchWord?api_key=$this",
@@ -27,6 +29,7 @@ class RiotApiService {
     }
 
     fun getLeague(leagueId: String): League? {
+        logger.info("get league with id $leagueId via riot api")
         return try {
             apiKey?.run {
                 restTemplate.getForObject(
@@ -41,6 +44,7 @@ class RiotApiService {
     }
 
     fun getLeagueSummoner(summonerId: String): Array<LeagueSummoner>? {
+        logger.info("get league of summoner with id $summonerId via riot api")
         return try {
             apiKey?.run {
                 restTemplate.getForObject(
