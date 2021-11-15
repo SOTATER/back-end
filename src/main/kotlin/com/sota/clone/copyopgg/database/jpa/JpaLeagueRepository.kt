@@ -4,6 +4,7 @@ import com.sota.clone.copyopgg.domain.entities.League
 import com.sota.clone.copyopgg.domain.repositories.LeagueRepository
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.context.annotation.Primary
 import org.springframework.data.jpa.repository.support.JpaEntityInformationSupport
 import org.springframework.stereotype.Repository
 import org.springframework.transaction.annotation.Transactional
@@ -11,6 +12,7 @@ import java.lang.Exception
 import javax.persistence.EntityManager
 import javax.persistence.PersistenceContext
 
+@Primary
 @Repository
 class JpaLeagueRepository(
     @PersistenceContext

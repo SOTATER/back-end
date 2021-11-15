@@ -6,6 +6,7 @@ import com.sota.clone.copyopgg.domain.entities.Summoner
 import com.sota.clone.copyopgg.domain.repositories.LeagueSummonerRepository
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.context.annotation.Primary
 import org.springframework.data.jpa.repository.support.JpaEntityInformationSupport
 import org.springframework.stereotype.Repository
 import org.springframework.transaction.annotation.Transactional
@@ -13,6 +14,7 @@ import java.lang.Exception
 import javax.persistence.EntityManager
 import javax.persistence.PersistenceContext
 
+@Primary
 @Repository
 class JpaLeagueSummonerRepository(
     @PersistenceContext
@@ -29,9 +31,9 @@ class JpaLeagueSummonerRepository(
         } else entityManager.merge(leagueSummoner)
     }
 
-    override fun findById(summonerId: String, leagueId: String): LeagueSummoner? {
+    override fun findById(id: LeagueSummonerPK): LeagueSummoner? {
         logger.info("findById called")
-        return entityManager.find(LeagueSummoner::class.java, LeagueSummonerPK(summonerId, leagueId))
+        return entityManager.find(LeagueSummoner::class.java, id)
     }
 
     override fun findBySummonerId(summonerId: String): List<LeagueSummoner> {
