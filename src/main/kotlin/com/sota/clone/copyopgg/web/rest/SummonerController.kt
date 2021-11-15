@@ -71,33 +71,36 @@ class SummonerController(
             name = "searchId",
             required = true
         ) searchId: String
-    ): ResponseEntity<LeagueBriefInfoBySummoner> {
+    ): ResponseEntity<List<LeagueBriefInfoBySummoner?>> {
         logger.info("Get league brief information with summoner id: $searchId")
-        return this.leagueSummonerRepo.getLeagueSummonerBySummonerId(searchId)?.let { leagueSummoner ->
-            this.leagueRepo.findLeagueById(leagueSummoner.leagueId)?.let { league ->
-                ResponseEntity.ok().body(
+        return ResponseEntity.ok().body(
+            this.leagueSummonerRepo.getLeagueSummonerBySummonerId(searchId).map {
+                this.leagueRepo.findLeagueById(it.leagueId)?.let { league ->
                     LeagueBriefInfoBySummoner(
                         tier = league.tier,
-                        wins = leagueSummoner.wins,
-                        loses = leagueSummoner.losses,
-                        leaguePoints = leagueSummoner.leaguePoints,
+                        wins = it.wins,
+                        loses = it.losses,
+                        leaguePoints = it.leaguePoints,
                         leagueName = league.name,
-                        rank = leagueSummoner.rank
+                        rank = it.rank,
+                        queueType = league.queue.toString()
                     )
-                )
-            } ?: ResponseEntity.notFound().build()
-        } ?: ResponseEntity.notFound().build()
+                }
+            }
+        )
     }
 
     @GetMapping("/refresh/{summonerId}")
     fun refresh(@PathVariable(name = "summonerId", required = true) summonerId: String): ResponseEntity<BooleanResponse> {
         logger.info("Synchronize data of summoner has id $summonerId")
-        val result = this.riotApiController.getLeagueSummoner(summonerId)?.let { leagueSummoner ->
-            this.riotApiController.getLeague(leagueSummoner.leagueId)?.let { league ->
-                this.leagueSummonerRepo.syncLeagueSummoner(leagueSummoner)
-                this.leagueRepo.syncLeague(league)
-                true
-            } ?: false
+        val result = this.riotApiController.getLeagueSummoner(summonerId)?.let { leagueSummoners ->
+            leagueSummoners.forEach { leagueSummoner ->
+                this.riotApiController.getLeague(leagueSummoner.leagueId)?.let { league ->
+                    this.leagueSummonerRepo.syncLeagueSummoner(leagueSummoner)
+                    this.leagueRepo.syncLeague(league)
+                }
+            }
+            true
         } ?: false
         return ResponseEntity.ok().body(
             BooleanResponse(

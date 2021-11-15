@@ -69,7 +69,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SummonerLeagueBriefInfo'
+                type: array
+                items:
+                  $ref: '#/components/schemas/SummonerLeagueBriefInfo'
   /api/summoners/refresh/{summonerId}:
     get:
       summary: Get brief league information with summoner's id
@@ -142,6 +144,7 @@ components:
         - tier
         - rank
         - leagueName
+        - queueType
       properties:
         wins:
           type: integer
@@ -158,6 +161,8 @@ components:
           format: int32
         leagueName:
           type: string
+        queueType:
+          $ref: '#/components/schemas/QueueType'
     Tier:
       type: string
       enum:
@@ -177,6 +182,12 @@ components:
         - II
         - III
         - IV
+    QueueType:
+      type: string
+      enum:
+        - RANKED_SOLO_5x5
+        - RANKED_FLEX_SR
+        - RANKED_FLEX_TT
     Summoners:
       type: array
       items:
