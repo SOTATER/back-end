@@ -5,6 +5,7 @@ import com.sota.clone.copyopgg.domain.repositories.LeagueRepository
 import com.sota.clone.copyopgg.domain.repositories.LeagueSummonerRepository
 import com.sota.clone.copyopgg.domain.repositories.SummonerRepository
 import com.sota.clone.copyopgg.domain.services.RiotApiService
+import com.sota.clone.copyopgg.domain.services.SummonerService
 import com.sota.clone.copyopgg.web.rest.SummonerController
 import io.mockk.*
 import io.mockk.impl.annotations.InjectMockKs
@@ -23,7 +24,7 @@ import com.sota.clone.copyopgg.utils.*
 @ExtendWith(MockKExtension::class)
 class SummonerControllerTest {
     @MockK
-    private lateinit var summonerRepository: SummonerRepository
+    private lateinit var summonerService: SummonerService
 
     @MockK
     private lateinit var leagueSummonerRepository: LeagueSummonerRepository
@@ -38,6 +39,8 @@ class SummonerControllerTest {
     @SpyK
     private lateinit var summonerController: SummonerController
 
+    private val testSummonerName = "tester"
+
     // TODO: BeforeEach와 AfterEach에서 왜 internal 써야되는지 알지 못하고 사용
     @BeforeEach
     internal fun init() {
@@ -50,51 +53,35 @@ class SummonerControllerTest {
     }
 
     @Test
-    fun testGetSummonerInfoWhenSummonerInDB() {
+    fun testGetMatchNames() {
         // given
-        // Summoner Repository에서 db의 데이터를 리턴
-        every { summonerRepository.searchByName(any<String>()) } returns DummyObjectUtils.getSummonerBriefInfo()
-
-        // verify
-        // getSummonerInfo에서 db의 데이터로부터 결과값 리턴 검증
-        assert(summonerController.getSummonerInfo("tester") == ResponseEntity.ok().body(DummyObjectUtils.getSummonerBriefInfo()))
-    }
-
-    @Test
-    fun testGetSummonerInfoWhenSummonerNotInDB() {
-        // given
-        // Summoner Repository에서 db에 데이터가 없으므로 null 리턴
-        every { summonerRepository.searchByName(any<String>()) } returns null
-        // db에 데이터가 없으므로, riot api를 통해 summoner 데이터 get
-        every { riotApiService.getSummoner(any<String>()) } returns DummyObjectUtils.getSummonerDTO()
-        // get한 summoner data는 db에 insert
-        every { summonerRepository.insertSummoner(any<SummonerDTO>()) } just Runs
-
+        every { summonerService.getFiveSummonersMatchedPartialName(any<String>()) } returns listOf(DummyObjectUtils.getSummonerDTO())
 
         // when
-        // getSummonerInfo API 호출
-        summonerController.getSummonerInfo("tester")
+        // getMatchNames 호출
+        summonerController.getMatchNames(this.testSummonerName)
 
         // verify
-        verify {
-            // riot api 호출 검증
-            riotApiService.getSummoner(any<String>())
-            // db insert api 호출 검증
-            summonerRepository.insertSummoner(any<SummonerDTO>())
+        // getFiveSummonersMatchedPartialName 한번 호출
+        verify(exactly = 1) {
+            summonerService.getFiveSummonersMatchedPartialName(any<String>())
         }
     }
 
     @Test
-    fun testGetSummonerInfoWhenSummonerNotExists() {
+    fun testGetSummonerInfo() {
         // given
-        // db에 데이터가 없으므로 null 리턴
-        every { summonerRepository.searchByName(any<String>()) } returns null
-        // riot api로부터도 데이터가 없으므로 null 리턴
-        every { riotApiService.getSummoner(any<String>()) } returns null
+        every { summonerService.getSummonerByName(any<String>()) } returns DummyObjectUtils.getSummonerDTO()
+
+        // when
+        // getSummonerInfo 호출
+        summonerController.getSummonerInfo(this.testSummonerName)
 
         // verify
-        // getSummonerInfo API에서 빈 결과 리턴 검증
-        assert(summonerController.getSummonerInfo("tester") == ResponseEntity<SummonerBriefInfo>(HttpStatus.NOT_FOUND))
+        // getSummonerByName이 한번 호출된다
+        verify(exactly = 1) {
+            summonerService.getSummonerByName(any<String>())
+        }
     }
 
     @Test
@@ -107,7 +94,10 @@ class SummonerControllerTest {
 
         // verify
         // getBriefLeagueInfo 결과값 리턴 검증
-        assert( summonerController.getBriefLeagueInfo("tester") == ResponseEntity.ok().body(DummyObjectUtils.getLeagueBriefInfo()))
+        assert(
+            summonerController.getBriefLeagueInfo("tester") == ResponseEntity.ok()
+                .body(DummyObjectUtils.getLeagueBriefInfo())
+        )
 
         // repo로부터 db 호출 검증
         verify {
@@ -125,7 +115,7 @@ class SummonerControllerTest {
 
         // verify
         // getBriefLeagueInfo에서 not found 리턴 (unranked) 처리
-        assert( summonerController.getBriefLeagueInfo("tester") == ResponseEntity<LeagueBriefInfoBySummoner>(HttpStatus.NOT_FOUND))
+        assert(summonerController.getBriefLeagueInfo("tester") == ResponseEntity<LeagueBriefInfoBySummoner>(HttpStatus.NOT_FOUND))
 
         // repo를 통해 db 호출했는지 검증
         verify {
