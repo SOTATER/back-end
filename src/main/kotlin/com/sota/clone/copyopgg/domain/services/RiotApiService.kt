@@ -58,18 +58,18 @@ class RiotApiService {
         }
     }
 
-    fun getLeagueSummoners(summonerId: String): List<LeagueSummonerDTO> {
+    fun getLeagueSummoners(summonerId: String): Array<LeagueSummonerDTO> {
         logger.info("get league of summoner with id $summonerId via riot api")
         return try {
             apiKey?.run {
                 restTemplate.getForObject(
                     "$apiRootUrl/lol/league/v4/entries/by-summoner/$summonerId?api_key=$this",
                     Array<LeagueSummonerDTO>::class.java
-                )?.asList()
-            } ?: listOf()
+                )
+            } ?: arrayOf()
         } catch (e: Exception) {
             logger.error("error occurred when using riot api", e)
-            listOf<LeagueSummonerDTO>()
+            arrayOf<LeagueSummonerDTO>()
         }
     }
 }
