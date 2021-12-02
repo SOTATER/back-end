@@ -2,6 +2,7 @@ package com.sota.clone.copyopgg.database
 
 import com.sota.clone.copyopgg.domain.models.*
 import com.sota.clone.copyopgg.domain.repositories.SummonerRepository
+import com.sota.clone.copyopgg.web.dto.summoners.LeagueDTO
 import com.sota.clone.copyopgg.web.dto.summoners.SummonerDTO
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -72,11 +73,13 @@ class JdbcSummonerRepository(
         val leagueInfo = if (RepositoryUtils.columnExistsInResultSet(rs, "league_id")) {
             val leagueId = rs.getString("league_id")
             if (leagueId == null) null
-            else LeagueInfo(
-                leagueId,
-                Tier.valueOf(rs.getString("tier")),
-                Rank.valueOf(rs.getString("rank")),
-                rs.getInt("league_points")
+            else LeagueDTO(
+                leagueId = leagueId,
+                tier = Tier.valueOf(rs.getString("tier")),
+                rank = Rank.valueOf(rs.getString("rank")),
+                leaguePoints = rs.getInt("league_points"),
+                name = null,
+                queue = null
             )
         } else null
 

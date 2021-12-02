@@ -13,7 +13,7 @@ import java.sql.ResultSet
 @Repository
 class JdbcLeagueRepository(
     @Autowired val jdbc: JdbcTemplate
-): LeagueRepository {
+) {
     val logger = LoggerFactory.getLogger(LeagueRepository::class.java)
 
     val insertLeagueSql =
@@ -26,7 +26,7 @@ class JdbcLeagueRepository(
     val updateLeagueByIdSql =
         "UPDATE leagues SET (tier, queue, name)=(?::tier, ?::queue, ?) where league_id=?"
 
-    override fun insertLeague(league: League): Int {
+    fun insertLeague(league: League): Int {
         println("tier is [${league.tier}]")
         return jdbc.update(
             insertLeagueSql,
@@ -37,7 +37,7 @@ class JdbcLeagueRepository(
         )
     }
 
-    override fun insertLeagues(leagues: List<League>) {
+    fun insertLeagues(leagues: List<League>) {
         val rows = jdbc.batchUpdate(insertLeagueSql, object : BatchPreparedStatementSetter {
             override fun setValues(ps: PreparedStatement, i: Int) {
                 val league = leagues[i]
@@ -54,7 +54,7 @@ class JdbcLeagueRepository(
         logger.info("$rows rows are inserted into leagues table")
     }
 
-    override fun updateLeagueById(league: League) {
+    fun updateLeagueById(league: League) {
         jdbc.update(
             updateLeagueByIdSql,
             league.tier.toString(),
@@ -64,7 +64,7 @@ class JdbcLeagueRepository(
         )
     }
 
-    override fun syncLeague(league: League) {
+    fun syncLeague(league: League) {
         if (existsLeagueById(league.leagueId)) {
             this.updateLeagueById(league)
         } else {
@@ -72,11 +72,11 @@ class JdbcLeagueRepository(
         }
     }
 
-    override fun findLeagueById(leagueId: String): League? {
+    fun findLeagueById(leagueId: String): League? {
         return jdbc.queryForObject(selectLeagueSql, this::mapToLeague, leagueId)
     }
 
-    override fun existsLeagueById(leagueId: String): Boolean {
+    fun existsLeagueById(leagueId: String): Boolean {
         val count = jdbc.queryForObject(existsLeagueSql, Integer::class.java, leagueId)
         return count > 0
     }

@@ -1,6 +1,8 @@
 package com.sota.clone.copyopgg.domain.services
 
 import com.sota.clone.copyopgg.domain.models.*
+import com.sota.clone.copyopgg.web.dto.summoners.LeagueDTO
+import com.sota.clone.copyopgg.web.dto.summoners.LeagueSummonerDTO
 import com.sota.clone.copyopgg.web.dto.summoners.SummonerDTO
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -28,13 +30,26 @@ class RiotApiService {
         null
     }
 
-    fun getLeague(leagueId: String): League? {
+    fun getSummonerById(searchId: String): SummonerDTO? = try {
+        logger.info("get summoner named $searchId via riot api")
+        apiKey?.run {
+            restTemplate.getForObject(
+                "$apiRootUrl/lol/summoner/v4/summoners/by-puuid/$searchId?api_key=$this",
+                SummonerDTO::class.java
+            )
+        }
+    } catch (e: Exception) {
+        logger.error("error occurred when using riot api", e)
+        null
+    }
+
+    fun getLeague(leagueId: String): LeagueDTO? {
         logger.info("get league with id $leagueId via riot api")
         return try {
             apiKey?.run {
                 restTemplate.getForObject(
                     "$apiRootUrl/lol/league/v4/leagues/$leagueId?api_key=$this",
-                    League::class.java
+                    LeagueDTO::class.java
                 )
             }
         } catch (e: Exception) {
@@ -43,18 +58,18 @@ class RiotApiService {
         }
     }
 
-    fun getLeagueSummoner(summonerId: String): Array<LeagueSummoner>? {
+    fun getLeagueSummoners(summonerId: String): Array<LeagueSummonerDTO> {
         logger.info("get league of summoner with id $summonerId via riot api")
         return try {
             apiKey?.run {
                 restTemplate.getForObject(
                     "$apiRootUrl/lol/league/v4/entries/by-summoner/$summonerId?api_key=$this",
-                    Array<LeagueSummoner>::class.java
+                    Array<LeagueSummonerDTO>::class.java
                 )
-            }
+            } ?: arrayOf()
         } catch (e: Exception) {
             logger.error("error occurred when using riot api", e)
-            null
+            arrayOf<LeagueSummonerDTO>()
         }
     }
 }

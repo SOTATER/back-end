@@ -1,12 +1,11 @@
 package com.sota.clone.copyopgg.web.rest
 
 import com.sota.clone.copyopgg.domain.models.BooleanResponse
-import com.sota.clone.copyopgg.domain.models.LeagueBriefInfoBySummoner
-import com.sota.clone.copyopgg.domain.repositories.LeagueRepository
-import com.sota.clone.copyopgg.domain.repositories.LeagueSummonerRepository
+import com.sota.clone.copyopgg.domain.models.QueueType
 import com.sota.clone.copyopgg.domain.services.RiotApiService
 import com.sota.clone.copyopgg.domain.services.SummonerService
-import com.sota.clone.copyopgg.web.dto.summoners.SummonerDTO
+import com.sota.clone.copyopgg.domain.services.SynchronizeService
+import com.sota.clone.copyopgg.web.dto.summoners.QueueInfoDTO
 import io.swagger.annotations.ApiOperation
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -17,10 +16,9 @@ import org.springframework.web.bind.annotation.*
 @RestController
 @RequestMapping("/api/summoners")
 class SummonerController(
-    @Autowired val leagueRepo: LeagueRepository,
-    @Autowired val leagueSummonerRepo: LeagueSummonerRepository,
     @Autowired val riotApiController: RiotApiService,
-    @Autowired val summonerService: SummonerService
+    @Autowired val summonerService: SummonerService,
+    @Autowired val synchronizeService: SynchronizeService
 ) {
     val logger: Logger = LoggerFactory.getLogger(SummonerController::class.java)
 
@@ -65,47 +63,50 @@ class SummonerController(
         } ?: ResponseEntity.notFound().build()
     }
 
-    @GetMapping("/league/brief/{searchId}")
-    fun getBriefLeagueInfo(
+    @GetMapping("/league/solo/{searchId}")
+    fun getSoloLeagueInfo(
         @PathVariable(
             name = "searchId",
             required = true
         ) searchId: String
-    ): ResponseEntity<List<LeagueBriefInfoBySummoner?>> {
-        logger.info("Get league brief information with summoner id: $searchId")
-        return ResponseEntity.ok().body(
-            this.leagueSummonerRepo.getLeagueSummonerBySummonerId(searchId).map {
-                this.leagueRepo.findLeagueById(it.leagueId)?.let { league ->
-                    LeagueBriefInfoBySummoner(
-                        tier = league.tier,
-                        wins = it.wins,
-                        loses = it.losses,
-                        leaguePoints = it.leaguePoints,
-                        leagueName = league.name,
-                        rank = it.rank,
-                        queueType = league.queue.toString()
-                    )
-                }
-            }
-        )
+    ): ResponseEntity<QueueInfoDTO> {
+        logger.info("Get solo league information with summoner id: $searchId")
+        return this.summonerService.getSummonerQueueInfo(searchId, QueueType.RANKED_SOLO_5x5)?.let {
+            ResponseEntity.ok().body(it)
+        } ?: ResponseEntity.notFound().build()
+    }
+
+    @GetMapping("/league/flex/{searchId}")
+    fun getFlexLeagueInfo(
+        @PathVariable(
+            name = "searchId",
+            required = true
+        ) searchId: String
+    ): ResponseEntity<QueueInfoDTO> {
+        logger.info("Get solo league information with summoner id: $searchId")
+        return this.summonerService.getSummonerQueueInfo(searchId, QueueType.RANKED_FLEX_SR)?.let {
+            ResponseEntity.ok().body(it)
+        } ?: ResponseEntity.notFound().build()
     }
 
     @GetMapping("/refresh/{summonerId}")
-    fun refresh(@PathVariable(name = "summonerId", required = true) summonerId: String): ResponseEntity<BooleanResponse> {
+    fun refresh(
+        @PathVariable(
+            name = "summonerId",
+            required = true
+        ) summonerId: String
+    ): ResponseEntity<BooleanResponse> {
         logger.info("Synchronize data of summoner has id $summonerId")
-        val result = this.riotApiController.getLeagueSummoner(summonerId)?.let { leagueSummoners ->
-            leagueSummoners.forEach { leagueSummoner ->
-                this.riotApiController.getLeague(leagueSummoner.leagueId)?.let { league ->
-                    this.leagueSummonerRepo.syncLeagueSummoner(leagueSummoner)
-                    this.leagueRepo.syncLeague(league)
-                }
-            }
-            true
-        } ?: false
         return ResponseEntity.ok().body(
             BooleanResponse(
-                id = summonerId,
-                result = result
+                summonerId,
+                try {
+                    this.synchronizeService.refresh(summonerId)
+                    true
+                } catch (e: Exception) {
+                    logger.info(e.message)
+                    false
+                }
             )
         )
     }
