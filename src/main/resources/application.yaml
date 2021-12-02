@@ -1,11 +1,13 @@
 spring:
+  profiles:
+    active: local
   datasource:
-    url: jdbc:postgresql://localhost:5432/copy-opgg
-    username: sotater
-    password: sotater123
+    url:
+    username:
+    password:
 
 application:
-  riotApiKey: RGAPI-e0b2c1f4-dc26-4d15-a7fc-6f0410b6146e
+  riotApiKey:
 
 api:
   version: v1
