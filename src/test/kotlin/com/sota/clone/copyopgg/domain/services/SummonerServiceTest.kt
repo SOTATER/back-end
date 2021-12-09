@@ -1,5 +1,7 @@
 package com.sota.clone.copyopgg.domain.services
 
+import com.sota.clone.copyopgg.domain.repositories.LeagueRepository
+import com.sota.clone.copyopgg.domain.repositories.LeagueSummonerRepository
 import com.sota.clone.copyopgg.domain.repositories.SummonerRepository
 import com.sota.clone.copyopgg.utils.DummyObjectUtils
 import com.sota.clone.copyopgg.utils.DummyObjectUtils.Companion.toDTO
@@ -18,6 +20,12 @@ import org.junit.jupiter.api.extension.ExtendWith
 class SummonerServiceTest {
     @MockK
     private lateinit var summonerRepository: SummonerRepository
+
+    @MockK
+    private lateinit var leagueSummonerRepository: LeagueSummonerRepository
+
+    @MockK
+    private lateinit var leagueRepository: LeagueRepository
 
     @MockK
     private lateinit var riotApiService: RiotApiService

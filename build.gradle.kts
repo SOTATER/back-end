@@ -31,6 +31,7 @@ dependencies {
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.apache.commons:commons-lang3")
+	testImplementation("org.jetbrains.kotlin:kotlin-test:1.1.51")
 	testImplementation("io.mockk:mockk:1.12.0")
 }
 
