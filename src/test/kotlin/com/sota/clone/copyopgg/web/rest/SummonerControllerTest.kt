@@ -50,7 +50,7 @@ class SummonerControllerTest {
     }
 
     @Test
-    fun testGetMatchNamesWhenExists() {
+    fun `Test GetMatchNames`() {
         // given
         val tester = DummyObjectUtils.getSummonerDTO()
         every { summonerService.getFiveSummonersMatchedPartialName(any<String>()) } returns listOf(tester)
@@ -75,7 +75,7 @@ class SummonerControllerTest {
     }
 
     @Test
-    fun testGetMatchNamesWhenNotExist() {
+    fun `Test GetMatchNames when no name matched exists`() {
         // given
         every { summonerService.getFiveSummonersMatchedPartialName(any<String>()) } returns listOf()
 
@@ -87,7 +87,7 @@ class SummonerControllerTest {
     }
 
     @Test
-    fun testGetSummonerInfoWhenExist() {
+    fun `Test GetSummonerInfo`() {
         // given
         val tester = DummyObjectUtils.getSummonerDTO()
         every { summonerService.getSummonerByName(any<String>()) } returns tester
@@ -114,7 +114,7 @@ class SummonerControllerTest {
     }
 
     @Test
-    fun testGetSummonerInfoWhenNotExist() {
+    fun `Test GetSummonerInfo when no such summoner exists`() {
         // given
         every { summonerService.getSummonerByName(any<String>()) } returns null
 
@@ -128,7 +128,7 @@ class SummonerControllerTest {
     }
 
     @Test
-    fun testGetSoloLeagueInfoWhenExist() {
+    fun `Test GetSoloLeagueInfo`() {
         val queue = DummyObjectUtils.getQueueInfoDTO()
         // given
         every { summonerService.getSummonerQueueInfo(any(), QueueType.RANKED_SOLO_5x5) } returns queue
@@ -142,7 +142,7 @@ class SummonerControllerTest {
     }
 
     @Test
-    fun testGetSoloLeagueInfoWhenNotExist() {
+    fun `Test GetSoloLeagueInfo when no such league info exists`() {
         // given
         every { summonerService.getSummonerQueueInfo(any(), QueueType.RANKED_SOLO_5x5) } returns null
 
@@ -154,12 +154,12 @@ class SummonerControllerTest {
     }
 
     @Test
-    fun testGetFlexLeagueInfo() {
+    fun `Test GetFlexLeagueInfo`() {
         // almost same as getSoloLeagueInfo, so just pass this test
     }
 
     @Test
-    fun testRefreshDone() {
+    fun `Test Refresh success`() {
         // given
         val bool = BooleanResponse("id", true)
         every { synchronizeService.refresh(any()) } just Runs
@@ -172,7 +172,7 @@ class SummonerControllerTest {
     }
 
     @Test
-    fun testRefreshFailed() {
+    fun `Test Refresh failed`() {
         // given
         val bool = BooleanResponse("id", false)
         every { synchronizeService.refresh(any()) } throws Exception()

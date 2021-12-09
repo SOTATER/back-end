@@ -60,23 +60,23 @@ class DummyObjectUtils {
             queue = QueueType.RANKED_SOLO_5x5)
 
         fun getLeagueSummoner() = LeagueSummoner(
-            summonerId = "1234",
-            leagueId = "1234",
-            leaguePoints = 1234,
+            summonerId = RandomStringUtils.random(5, true, true),
+            leagueId = RandomStringUtils.random(5, true, true),
+            leaguePoints = Random.nextInt(),
             rank = Rank.I,
-            wins = 1234,
-            losses = 1234,
-            veteran = true,
-            inactive = false,
-            freshBlood = true,
-            hotStreak = true,
+            wins = Random.nextInt(),
+            losses = Random.nextInt(),
+            veteran = Random.nextBoolean(),
+            inactive = Random.nextBoolean(),
+            freshBlood = Random.nextBoolean(),
+            hotStreak = Random.nextBoolean(),
         )
 
         fun getLeague() = League(
-            leagueId = "1234",
+            leagueId = RandomStringUtils.random(5, true, true),
             tier = Tier.SILVER,
             queue = QueueType.RANKED_SOLO_5x5,
-            name = "1234"
+            name = RandomStringUtils.random(5, true, true),
         )
     }
 }
