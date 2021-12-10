@@ -1,6 +1,6 @@
 package com.sota.clone.copyopgg.database.jpa
 
-import com.sota.clone.copyopgg.domain.models.Summoner
+import com.sota.clone.copyopgg.domain.entities.Summoner
 import com.sota.clone.copyopgg.domain.repositories.SummonerRepository
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Repository
