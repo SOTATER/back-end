@@ -1,8 +1,3 @@
-CREATE TYPE ban_info AS (
-	champion_id integer,
-	pick_turn integer
-);
-
 CREATE TYPE game_mode AS ENUM (
     'ARAM',
     'CLASSIC'
@@ -23,6 +18,13 @@ create type rank as enum (
 create type tier as enum (
     'CHALLENGER', 'GRANDMASTER', 'MASTER', 'DIAMOND', 'PLATINUM', 'GOLD', 'SILVER', 'BRONZE', 'IRON'
 );
+
+-- 포지션
+create type individual_position as enum ('TOP', 'JUNGLE', 'MIDDLE', 'BOTTOM', 'UTILITY');
+-- 라인
+create type lane_position as enum ('TOP', 'JUNGLE', 'MIDDLE', 'BOTTOM');
+-- 역할 (?)
+create type match_role as enum ('SOLO', 'NONE', 'CARRY', 'SUPPORT');
 
 create table if not exists leagues (
   queue queue not null,
@@ -62,10 +64,10 @@ create table if not exists matches (
     "game_creation" bigint not null,
     "game_duration" bigint not null,
     "game_id" bigint not null,
-    "game_mode" game_mode not null,
+    "game_mode" text not null,
     "game_name" text not null,
     "game_start_timestamp" bigint not null,
-    "game_type" game_type not null,
+    "game_type" text not null,
     "game_version" text not null,
     "map_id" int not null,
     "platform_id" text not null,
@@ -75,8 +77,8 @@ create table if not exists matches (
 );
 
 create table if not exists matches_teams (
-    "match_id" char(13) references matches,
-    "bans" ban_info[],
+    "id" serial,
+    "match_id" char(13) references matches("match_id"),
     "team_id" int not null,
     "win" boolean not null,
     "baron_first" boolean not null,
@@ -91,43 +93,37 @@ create table if not exists matches_teams (
     "rift_herald_kills" int not null,
     "tower_first" boolean not null,
     "tower_kills" int not null,
-    primary key("match_id", "team_id")
+    primary key("id")
 );
 
--- 특성 선택 구조
-create type perk_selection as (perk int, var1 int, var2 int, var3 int);
-create type perk_style as (description text, selections perk_selection[], style int);
-create type stat_perks as (defense int, flex int, offense int);
-create type perks as (stat_perks stat_perks, styles perk_style[]);
-
--- 포지션
-create type individual_position as enum ('TOP', 'JUNGLE', 'MIDDLE', 'BOTTOM', 'UTILITY');
--- 라인
-create type lane_position as enum ('TOP', 'JUNGLE', 'MIDDLE', 'BOTTOM');
--- 역할 (?)
-create type match_role as enum ('SOLO', 'NONE', 'CARRY', 'SUPPORT');
+create table if not exists matches_teams_ban_info (
+    "id" serial,
+    "match_team_id" int references matches_teams("id"),
+    "pick_turn" smallint not null,
+    "champion_id" smallint not null,
+    primary key("id")
+);
 
 create table if not exists matches_summoners (
+    "id" serial,
     "match_id" char(13) references matches,
     "puuid" char(78) references summoners,
     "game_ended_in_early_surrender" boolean not null,
     "game_ended_in_surrender" boolean not null,
-    "individual_position" individual_position not null,
-    "lane" lane_position not null,
+    "individual_position" text not null,
+    "lane" text not null,
     "participant_id" int not null,
     "riot_id_name" text,
     "riot_id_tagline" text,
-    "role" match_role not null,
+    "role" text not null,
     "team_early_surrendered" boolean not null,
     "team_id" int not null,
-    "team_position" individual_position not null,
-    primary key ("puuid", "match_id")
+    "team_position" text not null,
+    primary key("id")
 );
 
 create table if not exists matches_summoners_champion (
-    "match_id" char(13) references matches,
-    "puuid" char(78) references summoners,
-    "perks" perks not null,
+    "match_summoner_id" int references matches_summoners("id"),
     "champ_experience" int not null,
     "champion_name" text not null,
     "champion_transform" int not null,
@@ -137,12 +133,38 @@ create table if not exists matches_summoners_champion (
     "summoner1_id" int not null,
     "summoner2_casts" int not null,
     "summoner2_id" int not null,
-    primary key ("puuid", "match_id")
+    primary key("match_summoner_id")
+);
+
+create table if not exists matches_summoners_perks (
+    "id" serial,
+    "match_summoner_id" int references matches_summoners("id"),
+    "stat_perks_defense" int not null,
+    "stat_perks_flex" int not null,
+    "stat_perks_offense" int not null,
+    primary key("id")
+);
+
+create table if not exists matches_summoners_perks_styles (
+    "id" serial,
+    "perks_id" int references matches_summoners_perks("id"),
+    "style" smallint not null,
+    "description" text not null,
+    primary key("id")
+);
+
+create table if not exists matches_summoners_perks_styles_selections (
+    "id" serial,
+    "styles_id" int references matches_summoners_perks_styles("id"),
+    "perk" smallint not null,
+    "var1" smallint not null,
+    "var2" smallint not null,
+    "var3" smallint not null,
+    primary key("id")
 );
 
 create table if not exists matches_summoners_combat (
-    "match_id" char(13) references matches,
-    "puuid" char(78) references summoners,
+    "match_summoner_id" int references matches_summoners("id"),
     "kills" int not null,
     "deaths" int not null,
     "assists" int not null,
@@ -163,15 +185,14 @@ create table if not exists matches_summoners_combat (
     "largest_critical_strike" int not null,
     "largest_killing_spree" int not null,
     "largest_multi_kill" int not null,
-    primary key ("puuid", "match_id")
+    primary key ("match_summoner_id")
 );
 
 create table if not exists matches_summoners_objective (
-    "match_id" char(13) references matches,
-    "puuid" char(78) references summoners,
+    "match_summoner_id" int references matches_summoners("id"),
     "turret_kills" int not null,
     "turret_takedowns" int not null,
-    "turrets_lost" int not null,
+    "turret_lost" int not null,
     "neutral_minions_killed" int not null,
     "nexus_kills" int not null,
     "nexus_lost" int not null,
@@ -186,35 +207,32 @@ create table if not exists matches_summoners_objective (
     "dragon_kills" int not null,
     "baron_kills" int not null,
     "total_minions_killed" int not null,
-    primary key ("puuid", "match_id")
+    primary key ("match_summoner_id")
 );
 
 create table if not exists matches_summoners_vision (
-    "match_id" char(13) references matches,
-    "puuid" char(78) references summoners,
+    "match_summoner_id" int references matches_summoners("id"),
     "vision_wards_bought_in_game" int not null,
     "sight_wards_bought_in_game" int not null,
     "vision_score" int not null,
     "wards_killed" int not null,
     "wards_placed" int not null,
     "detector_wards_placed" int not null,
-    primary key ("puuid", "match_id")
+    primary key ("match_summoner_id")
 );
 
 create table if not exists matches_summoners_item (
-    "match_id" char(13) references matches,
-    "puuid" char(78) references summoners,
+    "match_summoner_id" int references matches_summoners("id"),
     "items" int[] not null,
     "item_purchased" int not null,
     "consumable_purchased" int not null,
     "gold_earned" int not null,
     "gold_spent" int not null,
-    primary key ("puuid", "match_id")
+    primary key ("match_summoner_id")
 );
 
 create table if not exists matches_summoners_record (
-    "match_id" char(13) references matches,
-    "puuid" char(78) references summoners,
+    "match_summoner_id" int references matches_summoners("id"),
     "total_damage_dealt" int not null,
     "total_damage_dealt_to_champions" int not null,
     "total_damage_shielded_on_teammates" int not null,
@@ -238,5 +256,5 @@ create table if not exists matches_summoners_record (
     "total_time_spent_dead" int not null,
     "total_units_healed" int not null,
     "longest_time_spent_living" int not null,
-    primary key ("puuid", "match_id")
+    primary key ("match_summoner_id")
 );

@@ -1,7 +1,6 @@
 package com.sota.clone.copyopgg.web.rest
 
 import com.sota.clone.copyopgg.domain.entities.Match
-import com.sota.clone.copyopgg.domain.services.MatchDto
 import com.sota.clone.copyopgg.domain.services.MatchService
 import com.sota.clone.copyopgg.domain.services.RiotApiService
 import org.springframework.beans.factory.annotation.Autowired
@@ -52,7 +51,7 @@ class MatchController(
     }
 
     @GetMapping("/{matchId}")
-    fun getMatch(@PathVariable(value = "matchId", required = true) matchId: String): ResponseEntity<MatchDto> {
+    fun getMatch(@PathVariable(value = "matchId", required = true) matchId: String): ResponseEntity<RiotApiService.MatchDto> {
         val result = riotApiService.getMatchDetail(matchId)
 
         return if(result != null) {
@@ -60,5 +59,11 @@ class MatchController(
         } else {
             ResponseEntity.notFound().build()
         }
+    }
+
+    @GetMapping("/update/by-puuid/{puuid}")
+    fun updateMatchesByPuuid(@PathVariable(value = "puuid", required =  true) puuid: String): ResponseEntity<Int> {
+        matchService.updateMatchesByPuuid(puuid)
+        return ResponseEntity.ok(0)
     }
 }
