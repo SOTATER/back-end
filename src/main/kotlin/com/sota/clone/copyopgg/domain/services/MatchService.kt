@@ -21,14 +21,6 @@ class MatchService(
     val logger: Logger = LoggerFactory.getLogger(MatchService::class.java)
 ) {
 
-    fun test() {
-        val test = matchRepo.findAll()
-    }
-
-    fun getMatchesByPuuid(): List<MatchDto> {
-        return listOf()
-    }
-
     fun getMatchSummariesByPuuid(puuid: String, page: Int, pageSize: Int): List<Map<String, Any?>> {
         val pageable: Pageable = PageRequest.of(page, pageSize)
         val matchSummoners = matchSummonerRepo.findByPuuid(puuid, pageable)
