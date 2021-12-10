@@ -2,12 +2,12 @@ spring:
   profiles:
     active: local
   datasource:
-    url:
-    username:
-    password:
+    url: ${COPY_OPGG_DATASOURCE_URL}
+    username: ${COPY_OPGG_DATASOURCE_USERNAME}
+    password: ${COPY_OPGG_DATASOURCE_PASSWORD}
 
 application:
-  riotApiKey:
+  riotApiKey: ${RIOT_API_KEY}
 
 api:
   version: v1
