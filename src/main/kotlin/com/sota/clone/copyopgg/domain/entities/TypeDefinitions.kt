@@ -1,4 +1,4 @@
-package com.sota.clone.copyopgg.domain.models
+package com.sota.clone.copyopgg.domain.entities
 
 import org.hibernate.HibernateException
 import org.hibernate.engine.spi.SharedSessionContractImplementor

@@ -1,6 +1,6 @@
 package com.sota.clone.copyopgg.domain.services
 
-import com.sota.clone.copyopgg.domain.models.*
+import com.sota.clone.copyopgg.domain.entities.*
 import com.sota.clone.copyopgg.web.dto.summoners.LeagueDTO
 import com.sota.clone.copyopgg.web.dto.summoners.LeagueSummonerDTO
 import com.sota.clone.copyopgg.web.dto.summoners.SummonerDTO
@@ -15,7 +15,20 @@ class RiotApiService {
     val logger: Logger = LoggerFactory.getLogger(RiotApiService::class.java)
     val apiRootUrl = "https://kr.api.riotgames.com"
     val restTemplate = RestTemplate()
-    val apiKey: String? = System.getenv("RIOT_API_KEY")
+    val apiKey: String? = "RGAPI-fb3bf5ff-a88f-48f3-9340-d0b30c1a77b1"
+
+//    fun getMatchHistory(puuid: String) {
+//        Orianna.setRiotAPIKey(apiKey)
+////        val history = Orianna.matchHistoryForSummoner(
+////            Summoner
+////                .withPuuid(puuid)
+////                .withRegion(Region.KOREA)
+////                .withPlatform(Platform.KOREA)
+////                .get()
+////        ).get()
+//        val match = Orianna.matchWithId(5446980350).withRegion(Region.KOREA).get()
+//        println(match)
+//    }
 
     fun getSummoner(searchWord: String): SummonerDTO? = try {
         logger.info("get summoner named $searchWord via riot api")

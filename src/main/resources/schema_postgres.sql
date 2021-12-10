@@ -1,20 +1,33 @@
---create type queue as enum (
---    'RANKED_SOLO_5x5', 'RANKED_FLEX_SR', 'RANKED_FLEX_TT'
---);
---
---create type rank as enum (
---    'I' , 'II', 'III', 'IV'
---);
---
---create type tier as enum (
---    'CHALLENGER', 'GRANDMASTER', 'MASTER', 'DIAMOND', 'PLATINUM', 'GOLD', 'SILVER', 'BRONZE', 'IRON'
---);
+CREATE TYPE ban_info AS (
+	champion_id integer,
+	pick_turn integer
+);
+
+CREATE TYPE game_mode AS ENUM (
+    'ARAM',
+    'CLASSIC'
+);
+
+CREATE TYPE game_type AS ENUM (
+    'MATCHED_GAME'
+);
+
+create type queue as enum (
+    'RANKED_SOLO_5x5', 'RANKED_FLEX_SR', 'RANKED_FLEX_TT'
+);
+
+create type rank as enum (
+    'I' , 'II', 'III', 'IV'
+);
+
+create type tier as enum (
+    'CHALLENGER', 'GRANDMASTER', 'MASTER', 'DIAMOND', 'PLATINUM', 'GOLD', 'SILVER', 'BRONZE', 'IRON'
+);
 
 create table if not exists leagues (
   queue queue not null,
   tier tier not null,
   league_id char(36),
-  name varchar(36) not null,
   primary key ("league_id")
 );
 

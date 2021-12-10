@@ -1,6 +1,6 @@
 package com.sota.clone.copyopgg.domain.repositories
 
-import com.sota.clone.copyopgg.domain.models.LeagueSummoner
+import com.sota.clone.copyopgg.domain.entities.LeagueSummoner
 
 interface LeagueSummonerRepository {
     fun save(leagueSummoner: LeagueSummoner)

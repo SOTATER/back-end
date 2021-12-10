@@ -1,6 +1,6 @@
 package com.sota.clone.copyopgg.database
 
-import com.sota.clone.copyopgg.domain.models.*
+import com.sota.clone.copyopgg.domain.entities.*
 import com.sota.clone.copyopgg.domain.repositories.LeagueRepository
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired

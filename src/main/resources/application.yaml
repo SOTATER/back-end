@@ -1,8 +1,9 @@
 spring:
   datasource:
-    url: ${COPY_OPGG_DATASOURCE_URL}
-    username: ${COPY_OPGG_DATASOURCE_USERNAME}
-    password: ${COPY_OPGG_DATASOURCE_PASSWORD}
+    url: jdbc:postgresql://34.69.171.78:5432/copy-opgg
+    username: sotater
+    password: sotater1234
+
 
 api:
   version: v1

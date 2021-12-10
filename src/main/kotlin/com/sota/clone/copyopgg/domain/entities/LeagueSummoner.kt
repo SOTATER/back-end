@@ -1,4 +1,4 @@
-package com.sota.clone.copyopgg.domain.models
+package com.sota.clone.copyopgg.domain.entities
 
 import com.sota.clone.copyopgg.web.dto.summoners.LeagueSummonerDTO
 import org.hibernate.annotations.Type

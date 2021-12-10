@@ -1,7 +1,7 @@
 package com.sota.clone.copyopgg.web.rest
 
-import com.sota.clone.copyopgg.domain.models.BooleanResponse
-import com.sota.clone.copyopgg.domain.models.QueueType
+import com.sota.clone.copyopgg.domain.entities.BooleanResponse
+import com.sota.clone.copyopgg.domain.entities.QueueType
 import com.sota.clone.copyopgg.domain.services.RiotApiService
 import com.sota.clone.copyopgg.domain.services.SummonerService
 import com.sota.clone.copyopgg.domain.services.SynchronizeService
