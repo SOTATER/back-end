@@ -22,13 +22,17 @@ class SynchronizeService(
 
     fun refresh(summonerId: String) {
         logger.info("refresh called")
+        // get summoner from db to get summoners puuid
         this.summonerRepository.findById(summonerId)?.run {
             val leagueSummoner = mutableListOf<LeagueSummoner>()
             val league = mutableListOf<League>()
+            // call riot api to get recent summoner info by puuid
             val summoner = riotApiService.getSummonerById(this.puuid)?.let {
                 Summoner(it)
             } ?: throw Exception("Summoner doesn't exist with id ${this.puuid}")
+            // get all recent leagueSummoners via riot api
             leagueSummoner.addAll(riotApiService.getLeagueSummoners(summonerId).map {
+                // get all recent leagues via riot api with league id of each leagueSummoner
                 league.add(
                     League(
                         riotApiService.getLeague(it.leagueId)
@@ -38,6 +42,7 @@ class SynchronizeService(
                 LeagueSummoner(it)
             })
 
+            // save all recent infos
             summonerRepository.save(summoner)
             leagueSummoner.forEach { leagueSummonerRepository.save(it) }
             league.forEach { leagueRepository.save(it) }

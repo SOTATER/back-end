@@ -93,7 +93,7 @@ class SummonerServiceTest {
     @Test
     fun `Test GetSummonerByName when no such summoner exists in DB`() {
         // given
-        val testSummonerDTO = DummyObjectUtils.getSummonerDTO()
+        val testSummonerDTO = DummyObjectUtils.getSummoner().toDTO()
         every { summonerRepository.findByName(any()) } returns null
         every { summonerRepository.save(any()) } just Runs
         every { riotApiService.getSummoner(any()) } returns testSummonerDTO

@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.http.ResponseEntity
 import com.sota.clone.copyopgg.utils.*
+import com.sota.clone.copyopgg.utils.ConvertDataUtils.Companion.toDTO
 import java.lang.Exception
 import kotlin.test.assertEquals
 
@@ -49,7 +50,7 @@ class SummonerControllerTest {
     @Test
     fun `Test GetMatchNames`() {
         // given
-        val tester = DummyObjectUtils.getSummonerDTO()
+        val tester = DummyObjectUtils.getSummoner().toDTO()
         every { summonerService.getFiveSummonersMatchedPartialName(any<String>()) } returns listOf(tester)
 
         // when
@@ -86,7 +87,7 @@ class SummonerControllerTest {
     @Test
     fun `Test GetSummonerInfo`() {
         // given
-        val tester = DummyObjectUtils.getSummonerDTO()
+        val tester = DummyObjectUtils.getSummoner().toDTO()
         every { summonerService.getSummonerByName(any<String>()) } returns tester
 
         // when

@@ -1,9 +1,8 @@
 package com.sota.clone.copyopgg.utils
 
-import com.sota.clone.copyopgg.domain.models.League
-import com.sota.clone.copyopgg.domain.models.LeagueSummoner
-import com.sota.clone.copyopgg.domain.models.QueueType
-import com.sota.clone.copyopgg.domain.models.Summoner
+import com.sota.clone.copyopgg.domain.models.*
+import com.sota.clone.copyopgg.web.dto.summoners.LeagueDTO
+import com.sota.clone.copyopgg.web.dto.summoners.LeagueSummonerDTO
 import com.sota.clone.copyopgg.web.dto.summoners.SummonerDTO
 import org.apache.commons.lang3.RandomStringUtils
 import kotlin.random.Random
@@ -39,6 +38,33 @@ class ConvertDataUtils {
             puuid = puuid,
             summonerLevel = summonerLevel
         )
+
+        fun LeagueSummoner.toDTO() = LeagueSummonerDTO(
+            summonerId = summonerId,
+            leagueId = leagueId,
+            leaguePoints = leaguePoints,
+            rank = rank,
+            wins = wins,
+            losses = losses,
+            veteran = veteran,
+            inactive = inactive,
+            freshBlood = freshBlood,
+            hotStreak = hotStreak,
+        )
+
+        fun LeagueSummonerDTO.toEntity() = LeagueSummoner(
+            summonerId = summonerId,
+            leagueId = leagueId,
+            leaguePoints = leaguePoints ?: Random.nextInt(),
+            rank = rank ?: Rank.I,
+            wins = wins ?: Random.nextInt(),
+            losses = losses ?: Random.nextInt(),
+            veteran = veteran ?: Random.nextBoolean(),
+            inactive = inactive ?: Random.nextBoolean(),
+            freshBlood = freshBlood ?: Random.nextBoolean(),
+            hotStreak = hotStreak ?: Random.nextBoolean(),
+        )
+
 
         fun League.replaceQueueType(queue: QueueType) = League(
             leagueId = leagueId,

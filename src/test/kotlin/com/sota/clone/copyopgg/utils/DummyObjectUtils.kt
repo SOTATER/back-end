@@ -1,6 +1,7 @@
 package com.sota.clone.copyopgg.utils
 
 import com.sota.clone.copyopgg.domain.models.*
+import com.sota.clone.copyopgg.web.dto.summoners.LeagueDTO
 import com.sota.clone.copyopgg.web.dto.summoners.QueueInfoDTO
 import com.sota.clone.copyopgg.web.dto.summoners.SummonerDTO
 import org.apache.commons.lang3.RandomStringUtils
@@ -9,16 +10,6 @@ import kotlin.random.Random
 class DummyObjectUtils {
     companion object {
         fun getSummoner() = Summoner(
-            accountId = RandomStringUtils.random(5, true, true),
-            puuid = RandomStringUtils.random(5, true, true),
-            id = RandomStringUtils.random(5, true, true),
-            summonerLevel = Random.nextLong(),
-            profileIconId = Random.nextInt(),
-            name = RandomStringUtils.random(5, true, false),
-            revisionDate = Random.nextLong()
-        )
-
-        fun getSummonerDTO() = SummonerDTO(
             accountId = RandomStringUtils.random(5, true, true),
             puuid = RandomStringUtils.random(5, true, true),
             id = RandomStringUtils.random(5, true, true),
@@ -57,6 +48,15 @@ class DummyObjectUtils {
             tier = Tier.SILVER,
             queue = QueueType.RANKED_SOLO_5x5,
             name = RandomStringUtils.random(5, true, true),
+        )
+
+        fun getLeagueDTO() = LeagueDTO(
+            leagueId = RandomStringUtils.random(5, true, true),
+            tier = Tier.SILVER,
+            queue = QueueType.RANKED_SOLO_5x5,
+            rank = Rank.I,
+            name = RandomStringUtils.random(5, true, true),
+            leaguePoints = Random.nextInt()
         )
     }
 }
