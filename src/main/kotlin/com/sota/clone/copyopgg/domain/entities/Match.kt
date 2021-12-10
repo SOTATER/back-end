@@ -6,7 +6,7 @@ import javax.persistence.*
 // data class Match
 @Entity
 @Table(name = "matches")
-data class Match(
+class Match(
     @Id
     @Column(name = "match_id")
     val id: String,
@@ -40,7 +40,8 @@ data class Match(
 
 }
 
-class MatchSummonersId(
+
+data class MatchSummonersId(
     val puuid: String,
     val matchId: String
 ) : Serializable

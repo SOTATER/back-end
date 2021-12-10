@@ -1,4 +1,6 @@
 package com.sota.clone.copyopgg.database.jpa
 
-class SummonerMatchRepository {
+import org.springframework.data.jpa.repository.JpaRepository
+
+interface SummonerMatchRepository {
 }
