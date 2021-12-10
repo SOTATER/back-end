@@ -28,26 +28,6 @@ class DummyObjectUtils {
             revisionDate = Random.nextLong()
         )
 
-        fun Summoner.toDTO() = SummonerDTO(
-            accountId = accountId,
-            profileIconId = profileIconId,
-            revisionDate = revisionDate,
-            name = name,
-            id = id,
-            puuid = puuid,
-            summonerLevel = summonerLevel
-        )
-
-        fun SummonerDTO.toEntity() = Summoner(
-            accountId = accountId ?: RandomStringUtils.random(5, true, true),
-            profileIconId = profileIconId ?: Random.nextInt(),
-            revisionDate = revisionDate ?: Random.nextLong(),
-            name = name ?: RandomStringUtils.random(5, true, true),
-            id = id ?: RandomStringUtils.random(5, true, true),
-            puuid = puuid,
-            summonerLevel = summonerLevel ?: Random.nextLong()
-        )
-
         fun getQueueInfoDTO() = QueueInfoDTO(
             summonerId = RandomStringUtils.random(5, true, true),
             leagueId = RandomStringUtils.random(5, true, true),

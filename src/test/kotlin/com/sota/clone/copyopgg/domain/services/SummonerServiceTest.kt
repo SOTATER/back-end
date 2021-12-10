@@ -5,8 +5,9 @@ import com.sota.clone.copyopgg.domain.models.QueueType
 import com.sota.clone.copyopgg.domain.repositories.LeagueRepository
 import com.sota.clone.copyopgg.domain.repositories.LeagueSummonerRepository
 import com.sota.clone.copyopgg.domain.repositories.SummonerRepository
+import com.sota.clone.copyopgg.utils.ConvertDataUtils.Companion.replaceQueueType
+import com.sota.clone.copyopgg.utils.ConvertDataUtils.Companion.toDTO
 import com.sota.clone.copyopgg.utils.DummyObjectUtils
-import com.sota.clone.copyopgg.utils.DummyObjectUtils.Companion.toDTO
 import com.sota.clone.copyopgg.web.dto.summoners.QueueInfoDTO
 import com.sota.clone.copyopgg.web.dto.summoners.SummonerDTO
 import io.mockk.*
@@ -18,7 +19,6 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import kotlin.math.exp
 import kotlin.test.assertEquals
 
 @ExtendWith(MockKExtension::class)
@@ -168,14 +168,7 @@ class SummonerServiceTest {
         // given
         val leagueSummoner = DummyObjectUtils.getLeagueSummoner()
         val summoners = listOf(leagueSummoner)
-        val league = DummyObjectUtils.getLeague().let {
-            League(
-                leagueId = it.leagueId,
-                tier = it.tier,
-                queue = QueueType.RANKED_FLEX_SR,
-                name = it.name
-            )
-        }
+        val league = DummyObjectUtils.getLeague().replaceQueueType(QueueType.RANKED_FLEX_SR)
         every { leagueSummonerRepository.findBySummonerId(any()) } returns summoners
         every { leagueRepository.findById(any())} returns league
         every { leagueSummonerRepository.findById(any(), any()) } returns leagueSummoner
