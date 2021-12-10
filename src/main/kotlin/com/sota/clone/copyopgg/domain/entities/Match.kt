@@ -1,7 +1,5 @@
 package com.sota.clone.copyopgg.domain.entities
 
-import com.merakianalytics.orianna.types.common.GameMode
-import com.merakianalytics.orianna.types.common.GameType
 import org.hibernate.annotations.ColumnDefault
 import org.hibernate.annotations.Type
 import org.hibernate.annotations.TypeDef
