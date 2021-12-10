@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.*
 @RestController
 @RequestMapping("/api/summoners")
 class SummonerController(
-    @Autowired val riotApiController: RiotApiService,
     @Autowired val summonerService: SummonerService,
     @Autowired val synchronizeService: SynchronizeService
 ) {

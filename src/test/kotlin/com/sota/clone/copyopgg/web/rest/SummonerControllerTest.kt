@@ -27,9 +27,6 @@ class SummonerControllerTest {
     private lateinit var summonerService: SummonerService
 
     @MockK
-    private lateinit var riotApiService: RiotApiService
-
-    @MockK
     private lateinit var synchronizeService: SynchronizeService
 
     @InjectMockKs
