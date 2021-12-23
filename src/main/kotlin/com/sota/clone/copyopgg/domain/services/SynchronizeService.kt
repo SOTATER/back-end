@@ -1,8 +1,8 @@
 package com.sota.clone.copyopgg.domain.services
 
-import com.sota.clone.copyopgg.domain.models.League
-import com.sota.clone.copyopgg.domain.models.LeagueSummoner
-import com.sota.clone.copyopgg.domain.models.Summoner
+import com.sota.clone.copyopgg.domain.entities.League
+import com.sota.clone.copyopgg.domain.entities.LeagueSummoner
+import com.sota.clone.copyopgg.domain.entities.Summoner
 import com.sota.clone.copyopgg.domain.repositories.LeagueRepository
 import com.sota.clone.copyopgg.domain.repositories.LeagueSummonerRepository
 import com.sota.clone.copyopgg.domain.repositories.SummonerRepository

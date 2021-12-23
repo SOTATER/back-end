@@ -1,6 +1,6 @@
 package com.sota.clone.copyopgg.database
 
-import com.sota.clone.copyopgg.domain.models.*
+import com.sota.clone.copyopgg.domain.entities.*
 import com.sota.clone.copyopgg.domain.repositories.SummonerRepository
 import com.sota.clone.copyopgg.web.dto.summoners.LeagueDTO
 import com.sota.clone.copyopgg.web.dto.summoners.SummonerDTO

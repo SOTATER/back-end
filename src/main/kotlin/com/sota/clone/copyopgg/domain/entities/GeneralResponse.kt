@@ -1,4 +1,4 @@
-package com.sota.clone.copyopgg.domain.models
+package com.sota.clone.copyopgg.domain.entities
 
 data class BooleanResponse(
     val id: String,

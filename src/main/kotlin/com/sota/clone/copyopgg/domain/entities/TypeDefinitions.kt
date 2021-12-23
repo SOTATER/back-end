@@ -1,4 +1,4 @@
-package com.sota.clone.copyopgg.domain.models
+package com.sota.clone.copyopgg.domain.entities
 
 import org.hibernate.HibernateException
 import org.hibernate.engine.spi.SharedSessionContractImplementor
@@ -6,6 +6,39 @@ import org.hibernate.type.EnumType
 import java.sql.PreparedStatement
 import java.sql.SQLException
 import java.sql.Types
+
+enum class GameType {
+    CUSTOM_GAME,
+    MATCHED_GAME,
+    TUTORIAL_GAME
+}
+
+enum class GameMode {
+    ARAM,
+    ARSR,
+    ASCENSION,
+    ASSASSINATE,
+    CLASSIC,
+    DARKSTAR,
+    DOOMBOTSTEEMO,
+    FIRSTBLOOD,
+    INTRO,
+    KINGPORO,
+    NEXUSBLITZ,
+    ODIN,
+    ONEFORALL,
+    OVERCHARGE,
+    PRACTICETOOL,
+    PROJECT,
+    SIEGE,
+    SNOWURF,
+    STARTGUARDIAN,
+    TUTORIAL,
+    TUTORIAL_MODULE_1,
+    TUTORIAL_MODULE_2,
+    TUTORIAL_MODULE_3,
+    URF
+}
 
 enum class QueueType {
     RANKED_SOLO_5x5, RANKED_FLEX_SR, RANKED_FLEX_TT

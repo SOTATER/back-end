@@ -1,0 +1,11 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/copy-opgg
+    username: sotater
+    password: sotater123
+
+application:
+  riotApiKey:
+
+api:
+  version: v1

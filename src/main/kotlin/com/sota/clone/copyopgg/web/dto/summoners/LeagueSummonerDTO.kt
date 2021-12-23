@@ -1,8 +1,8 @@
 package com.sota.clone.copyopgg.web.dto.summoners
 
-import com.sota.clone.copyopgg.domain.models.QueueType
-import com.sota.clone.copyopgg.domain.models.Rank
-import com.sota.clone.copyopgg.domain.models.Tier
+import com.sota.clone.copyopgg.domain.entities.QueueType
+import com.sota.clone.copyopgg.domain.entities.Rank
+import com.sota.clone.copyopgg.domain.entities.Tier
 
 data class LeagueSummonerDTO(
     val summonerId: String,

@@ -1,8 +1,8 @@
 package com.sota.clone.copyopgg.database.jpa
 
-import com.sota.clone.copyopgg.domain.models.LeagueSummoner
-import com.sota.clone.copyopgg.domain.models.LeagueSummonerPK
-import com.sota.clone.copyopgg.domain.models.Summoner
+import com.sota.clone.copyopgg.domain.entities.LeagueSummoner
+import com.sota.clone.copyopgg.domain.entities.LeagueSummonerPK
+import com.sota.clone.copyopgg.domain.entities.Summoner
 import com.sota.clone.copyopgg.domain.repositories.LeagueSummonerRepository
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
