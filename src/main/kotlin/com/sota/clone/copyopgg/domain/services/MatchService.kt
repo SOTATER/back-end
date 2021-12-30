@@ -55,7 +55,7 @@ class MatchService(
 
     fun updateMatchesByPuuid(puuid: String): Int {
         // 현재 저장된 플레이어의 매치 중 가장 최신의 것의 id를 가져온다.
-        val latestMatch = matchRepo.findLatestMatchByPuuid(puuid)
+        val latestMatch = matchRepo.findLatestMatch()
         // riot api를 통해 가져올 매치들의 id 목록 가져오기
         val ids = riotApiService.getMatchIdsByPuuid(
             puuid,
