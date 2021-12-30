@@ -1,6 +1,8 @@
 package com.sota.clone.copyopgg.utils
 
 import com.sota.clone.copyopgg.domain.models.*
+import com.sota.clone.copyopgg.web.dto.summoners.LeagueDTO
+import com.sota.clone.copyopgg.web.dto.summoners.QueueInfoDTO
 import com.sota.clone.copyopgg.web.dto.summoners.SummonerDTO
 import org.apache.commons.lang3.RandomStringUtils
 import kotlin.random.Random
@@ -17,63 +19,44 @@ class DummyObjectUtils {
             revisionDate = Random.nextLong()
         )
 
-        fun getSummonerDTO() = SummonerDTO(
-            accountId = RandomStringUtils.random(5, true, true),
-            puuid = RandomStringUtils.random(5, true, true),
-            id = RandomStringUtils.random(5, true, true),
-            summonerLevel = Random.nextLong(),
-            profileIconId = Random.nextInt(),
-            name = RandomStringUtils.random(5, true, false),
-            revisionDate = Random.nextLong()
-        )
-
-        fun Summoner.toDTO() = SummonerDTO(
-            accountId = accountId,
-            profileIconId = profileIconId,
-            revisionDate = revisionDate,
-            name = name,
-            id = id,
-            puuid = puuid,
-            summonerLevel = summonerLevel
-        )
-
-        fun SummonerDTO.toEntity() = Summoner(
-            accountId = accountId ?: RandomStringUtils.random(5, true, true),
-            profileIconId = profileIconId ?: Random.nextInt(),
-            revisionDate = revisionDate ?: Random.nextLong(),
-            name = name ?: RandomStringUtils.random(5, true, true),
-            id = id ?: RandomStringUtils.random(5, true, true),
-            puuid = puuid,
-            summonerLevel = summonerLevel ?: Random.nextLong()
-        )
+        fun getQueueInfoDTO() = QueueInfoDTO(
+            summonerId = RandomStringUtils.random(5, true, true),
+            leagueId = RandomStringUtils.random(5, true, true),
+            tier = Tier.BRONZE,
+            rank = Rank.I,
+            leaguePoints = Random.nextInt(),
+            wins = Random.nextInt(),
+            losses = Random.nextInt(),
+            leagueName = RandomStringUtils.random(5, true, true),
+            queue = QueueType.RANKED_SOLO_5x5)
 
         fun getLeagueSummoner() = LeagueSummoner(
-            summonerId = "1234",
-            leagueId = "1234",
-            leaguePoints = 1234,
+            summonerId = RandomStringUtils.random(5, true, true),
+            leagueId = RandomStringUtils.random(5, true, true),
+            leaguePoints = Random.nextInt(),
             rank = Rank.I,
-            wins = 1234,
-            losses = 1234,
-            veteran = true,
-            inactive = false,
-            freshBlood = true,
-            hotStreak = true,
+            wins = Random.nextInt(),
+            losses = Random.nextInt(),
+            veteran = Random.nextBoolean(),
+            inactive = Random.nextBoolean(),
+            freshBlood = Random.nextBoolean(),
+            hotStreak = Random.nextBoolean(),
         )
 
         fun getLeague() = League(
-            leagueId = "1234",
+            leagueId = RandomStringUtils.random(5, true, true),
             tier = Tier.SILVER,
             queue = QueueType.RANKED_SOLO_5x5,
-            name = "1234"
+            name = RandomStringUtils.random(5, true, true),
         )
 
-        fun getLeagueBriefInfo() = LeagueBriefInfoBySummoner(
-            leaguePoints = 1234,
-            wins = 1234,
-            loses = 1234,
+        fun getLeagueDTO() = LeagueDTO(
+            leagueId = RandomStringUtils.random(5, true, true),
             tier = Tier.SILVER,
+            queue = QueueType.RANKED_SOLO_5x5,
             rank = Rank.I,
-            leagueName = "1234"
+            name = RandomStringUtils.random(5, true, true),
+            leaguePoints = Random.nextInt()
         )
     }
 }

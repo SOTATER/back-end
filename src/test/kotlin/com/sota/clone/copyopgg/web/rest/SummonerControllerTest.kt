@@ -3,10 +3,9 @@ package com.sota.clone.copyopgg.web.rest
 import com.sota.clone.copyopgg.domain.models.*
 import com.sota.clone.copyopgg.domain.repositories.LeagueRepository
 import com.sota.clone.copyopgg.domain.repositories.LeagueSummonerRepository
-import com.sota.clone.copyopgg.domain.repositories.SummonerRepository
 import com.sota.clone.copyopgg.domain.services.RiotApiService
 import com.sota.clone.copyopgg.domain.services.SummonerService
-import com.sota.clone.copyopgg.web.rest.SummonerController
+import com.sota.clone.copyopgg.domain.services.SynchronizeService
 import io.mockk.*
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
@@ -16,9 +15,11 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import com.sota.clone.copyopgg.utils.*
+import com.sota.clone.copyopgg.utils.ConvertDataUtils.Companion.toDTO
+import java.lang.Exception
+import kotlin.test.assertEquals
 
 
 @ExtendWith(MockKExtension::class)
@@ -27,13 +28,7 @@ class SummonerControllerTest {
     private lateinit var summonerService: SummonerService
 
     @MockK
-    private lateinit var leagueSummonerRepository: LeagueSummonerRepository
-
-    @MockK
-    private lateinit var leagueRepository: LeagueRepository
-
-    @MockK
-    private lateinit var riotApiService: RiotApiService
+    private lateinit var synchronizeService: SynchronizeService
 
     @InjectMockKs
     @SpyK
@@ -53,132 +48,137 @@ class SummonerControllerTest {
     }
 
     @Test
-    fun testGetMatchNames() {
+    fun `Test GetMatchNames`() {
         // given
-        every { summonerService.getFiveSummonersMatchedPartialName(any<String>()) } returns listOf(DummyObjectUtils.getSummonerDTO())
+        val tester = DummyObjectUtils.getSummoner().toDTO()
+        every { summonerService.getFiveSummonersMatchedPartialName(any<String>()) } returns listOf(tester)
 
         // when
         // getMatchNames 호출
-        summonerController.getMatchNames(this.testSummonerName)
+        val names = summonerController.getMatchNames(this.testSummonerName)
 
         // verify
         // getFiveSummonersMatchedPartialName 한번 호출
-        verify(exactly = 1) {
-            summonerService.getFiveSummonersMatchedPartialName(any<String>())
+        val testerJson = tester.let {
+            mapOf(
+                "id" to it.puuid,
+                "name" to it.name,
+                "profileIconId" to it.profileIconId,
+                "summonerLevel" to it.summonerLevel,
+                "leagueInfo" to null
+            )
         }
+
+        assertEquals(listOf(testerJson), names)
     }
 
     @Test
-    fun testGetSummonerInfo() {
+    fun `Test GetMatchNames when no name matched exists`() {
         // given
-        every { summonerService.getSummonerByName(any<String>()) } returns DummyObjectUtils.getSummonerDTO()
+        every { summonerService.getFiveSummonersMatchedPartialName(any<String>()) } returns listOf()
+
+        // when
+        val names = summonerController.getMatchNames(this.testSummonerName)
+
+        // verify
+        assertEquals(listOf(), names)
+    }
+
+    @Test
+    fun `Test GetSummonerInfo`() {
+        // given
+        val tester = DummyObjectUtils.getSummoner().toDTO()
+        every { summonerService.getSummonerByName(any<String>()) } returns tester
 
         // when
         // getSummonerInfo 호출
-        summonerController.getSummonerInfo(this.testSummonerName)
+        val info = summonerController.getSummonerInfo(this.testSummonerName)
 
         // verify
         // getSummonerByName이 한번 호출된다
-        verify(exactly = 1) {
-            summonerService.getSummonerByName(any<String>())
+        val packed: ResponseEntity<Map<String, Any?>> = tester.let {
+            ResponseEntity.ok().body(
+                mapOf(
+                    "id" to it.puuid,
+                    "name" to it.name,
+                    "profileIconId" to it.profileIconId,
+                    "summonerLevel" to it.summonerLevel,
+                    "leagueInfo" to null
+                )
+            )
         }
+
+        assertEquals(packed, info)
     }
 
     @Test
-    fun testGetSummonerLeagueInfoInDB() {
+    fun `Test GetSummonerInfo when no such summoner exists`() {
         // given
-        // LeagueSummoner repo에서 db에 있는 값 리턴
-        every { leagueSummonerRepository.getLeagueSummonerBySummonerId(any<String>()) } returns DummyObjectUtils.getLeagueSummoner()
-        // League repo에서 db에 있는 값 리턴
-        every { leagueRepository.findLeagueById(any<String>()) } returns DummyObjectUtils.getLeague()
-
-        // verify
-        // getBriefLeagueInfo 결과값 리턴 검증
-        assert(
-            summonerController.getBriefLeagueInfo("tester") == ResponseEntity.ok()
-                .body(DummyObjectUtils.getLeagueBriefInfo())
-        )
-
-        // repo로부터 db 호출 검증
-        verify {
-            leagueSummonerRepository.getLeagueSummonerBySummonerId(any<String>())
-            leagueRepository.findLeagueById(any<String>())
-        }
-    }
-
-    @Test
-    fun testGetSummonerLeagueInfoNotInDB() {
-        // given
-        // db에 데이터가 없으므로 null 리턴
-        every { leagueSummonerRepository.getLeagueSummonerBySummonerId(any<String>()) } returns null
-        every { leagueRepository.findLeagueById(any<String>()) } returns DummyObjectUtils.getLeague()
-
-        // verify
-        // getBriefLeagueInfo에서 not found 리턴 (unranked) 처리
-        assert(summonerController.getBriefLeagueInfo("tester") == ResponseEntity<LeagueBriefInfoBySummoner>(HttpStatus.NOT_FOUND))
-
-        // repo를 통해 db 호출했는지 검증
-        verify {
-            leagueSummonerRepository.getLeagueSummonerBySummonerId(any<String>())
-        }
-    }
-
-    @Test
-    fun testRefreshDone() {
-        // given
-        // match db sync 콜
-        // league db sync 콜
-        every { leagueRepository.syncLeague(any<League>()) } just runs
-        // league_summoner db sync 콜
-        every { leagueSummonerRepository.syncLeagueSummoner(any<LeagueSummoner>()) } just runs
-        // riot api 콜
-        every { riotApiService.getLeague(any<String>()) } returns DummyObjectUtils.getLeague()
-        every { riotApiService.getLeagueSummoner(any<String>()) } returns DummyObjectUtils.getLeagueSummoner()
+        every { summonerService.getSummonerByName(any<String>()) } returns null
 
         // when
-        // refresh function 콜
-        assert(summonerController.refresh("tester") == ResponseEntity.ok().body(BooleanResponse("tester", true)))
+        // getSummonerInfo 호출
+        val info = summonerController.getSummonerInfo(this.testSummonerName)
 
         // verify
-        verifySequence {
-            riotApiService.getLeagueSummoner(any<String>())
-            riotApiService.getLeague(any<String>())
-            leagueSummonerRepository.syncLeagueSummoner(any<LeagueSummoner>())
-            leagueRepository.syncLeague(any<League>())
-        }
-        verify(exactly = 1) {
-            riotApiService.getLeagueSummoner(any<String>())
-            riotApiService.getLeague(any<String>())
-            leagueSummonerRepository.syncLeagueSummoner(any<LeagueSummoner>())
-            leagueRepository.syncLeague(any<League>())
-        }
+        // getSummonerByName이 한번 호출된다
+        assertEquals(ResponseEntity.notFound().build(), info)
     }
 
     @Test
-    fun testRefreshFailed() {
+    fun `Test GetSoloLeagueInfo`() {
+        val queue = DummyObjectUtils.getQueueInfoDTO()
         // given
-        // match db sync 콜
-        // league db sync 콜
-        every { leagueRepository.syncLeague(any<League>()) } just runs
-        // league_summoner db sync 콜
-        every { leagueSummonerRepository.syncLeagueSummoner(any<LeagueSummoner>()) } just runs
-        // riot api 콜
-        every { riotApiService.getLeague(any<String>()) } returns null
-        every { riotApiService.getLeagueSummoner(any<String>()) } returns DummyObjectUtils.getLeagueSummoner()
+        every { summonerService.getSummonerQueueInfo(any(), QueueType.RANKED_SOLO_5x5) } returns queue
 
         // when
-        // refresh function 콜
-        assert(summonerController.refresh("tester") == ResponseEntity.ok().body(BooleanResponse("tester", false)))
+        val info = summonerController.getSoloLeagueInfo("test")
 
         // verify
-        verify(exactly = 1) {
-            riotApiService.getLeagueSummoner(any<String>())
-            riotApiService.getLeague(any<String>())
-        }
+        val packed = queue.let { ResponseEntity.ok().body(it) }
+        assertEquals(packed, info)
+    }
 
-        verify(exactly = 0) {
-            leagueSummonerRepository.syncLeagueSummoner(any<LeagueSummoner>())
-            leagueRepository.syncLeague(any<League>())
-        }
+    @Test
+    fun `Test GetSoloLeagueInfo when no such league info exists`() {
+        // given
+        every { summonerService.getSummonerQueueInfo(any(), QueueType.RANKED_SOLO_5x5) } returns null
+
+        // when
+        val info = summonerController.getSoloLeagueInfo("test")
+
+        // verify
+        assertEquals(ResponseEntity.notFound().build(), info)
+    }
+
+    @Test
+    fun `Test GetFlexLeagueInfo`() {
+        // almost same as getSoloLeagueInfo, so just pass this test
+    }
+
+    @Test
+    fun `Test Refresh success`() {
+        // given
+        val bool = BooleanResponse("id", true)
+        every { synchronizeService.refresh(any()) } just Runs
+
+        // when
+        val done = summonerController.refresh("id")
+
+        // verify
+        assertEquals(ResponseEntity.ok().body(bool), done)
+    }
+
+    @Test
+    fun `Test Refresh failed`() {
+        // given
+        val bool = BooleanResponse("id", false)
+        every { synchronizeService.refresh(any()) } throws Exception()
+
+        // when
+        val done = summonerController.refresh("id")
+
+        // verify
+        assertEquals(ResponseEntity.ok().body(bool), done)
     }
 }
