@@ -1,7 +1,6 @@
 package com.sota.clone.copyopgg.utils
 
-import com.sota.clone.copyopgg.domain.models.*
-import com.sota.clone.copyopgg.web.dto.summoners.LeagueDTO
+import com.sota.clone.copyopgg.domain.entities.*
 import com.sota.clone.copyopgg.web.dto.summoners.LeagueSummonerDTO
 import com.sota.clone.copyopgg.web.dto.summoners.SummonerDTO
 import org.apache.commons.lang3.RandomStringUtils
