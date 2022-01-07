@@ -1,8 +1,9 @@
 package com.sota.clone.copyopgg.domain.repositories
 
 import com.sota.clone.copyopgg.domain.entities.League
+import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.stereotype.Repository
 
-interface LeagueRepository {
-    fun save(league: League)
-    fun findById(id: String): League?
+@Repository
+interface LeagueRepository : JpaRepository<League, String> {
 }
