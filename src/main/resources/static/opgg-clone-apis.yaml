@@ -160,7 +160,6 @@ components:
       required:
         - summonerId
         - leagueId
-        - queue
         - leaguePoints
         - wins
         - loses
@@ -173,8 +172,6 @@ components:
           type: string
         leagueId:
           type: string
-        queue:
-          $ref: '#/components/schemas/Queue'
         wins:
           type: integer
           format: int32

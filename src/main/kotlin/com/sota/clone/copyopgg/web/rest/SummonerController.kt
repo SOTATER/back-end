@@ -32,7 +32,7 @@ class SummonerController(
         logger.info("Searching for summoner names that start with '$searchWord'")
         return this.summonerService.getFiveSummonersMatchedPartialName(searchWord).map {
             mapOf(
-                "id" to it.puuid,
+                "id" to it.id,
                 "name" to it.name,
                 "profileIconId" to it.profileIconId,
                 "summonerLevel" to it.summonerLevel,
@@ -52,7 +52,7 @@ class SummonerController(
         return this.summonerService.getSummonerByName(searchWord)?.let {
             ResponseEntity.ok().body(
                 mapOf(
-                    "id" to it.puuid,
+                    "id" to it.id,
                     "name" to it.name,
                     "profileIconId" to it.profileIconId,
                     "summonerLevel" to it.summonerLevel,
