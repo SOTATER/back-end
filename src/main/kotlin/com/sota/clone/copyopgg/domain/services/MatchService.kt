@@ -2,9 +2,12 @@ package com.sota.clone.copyopgg.domain.services
 
 import com.sota.clone.copyopgg.domain.dto.MatchDto
 import com.sota.clone.copyopgg.domain.entities.Match
+import com.sota.clone.copyopgg.domain.entities.SummonerChampionStatistics
+import com.sota.clone.copyopgg.domain.entities.QueueType
 import com.sota.clone.copyopgg.domain.repositories.MatchRepository
 import com.sota.clone.copyopgg.domain.repositories.MatchSummonerRepository
 import com.sota.clone.copyopgg.domain.repositories.MatchTeamRepository
+import com.sota.clone.copyopgg.domain.repositories.SummonerChampionStatisticsRepository
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -17,6 +20,7 @@ class MatchService(
     @Autowired val matchRepo: MatchRepository,
     @Autowired val matchSummonerRepo: MatchSummonerRepository,
     @Autowired val matchTeamRepo: MatchTeamRepository,
+    @Autowired val summonerChampionStatisticsRepo: SummonerChampionStatisticsRepository,
     @Autowired val riotApiService: RiotApiService,
     val logger: Logger = LoggerFactory.getLogger(MatchService::class.java)
 ) {
@@ -64,10 +68,14 @@ class MatchService(
             )
         )
 
+        // 매치 id들을 이용하여 챔피언 통계 update
+        updateSummonerChampionStatistics(ids, puuid)
+
         // Riot API를 통해 해당 매치 이후의 매치들을 가져온다
         ids.forEach { matchId ->
             if (matchId != latestMatch.id) migrateMatchData(matchId)
         }
+
         return ids.size - 1
     }
 
@@ -79,6 +87,30 @@ class MatchService(
             matchRepo.save(match)
             matchSummonerRepo.saveAll(match.matchSummoners)
             matchTeamRepo.saveAll(match.matchTeams)
+        }
+    }
+
+    private fun updateSummonerChampionStatistics(ids: List<String>, puuid: String) {
+        //ids 읽으면서 summonerChampionrepo에 save
+        ids.forEach { matchId ->
+            val detail = riotApiService.getMatchDetail(matchId)
+            val myDetail = detail!!.info.participants.find({ i -> i.puuid == puuid})
+            if (detail.info.queueId != 420 && detail.info.queueId != 440)
+                return@forEach
+            summonerChampionStatisticsRepo.save(
+                SummonerChampionStatistics(
+                    minions_killed_all = myDetail!!.totalMinionsKilled,
+                    kills_all = myDetail.kills,
+                    assists_all = myDetail.assists,
+                    deaths_all = myDetail.deaths,
+                    played = 1,
+                    wins = if (myDetail.win) 1 else 0,
+                    champion_id = myDetail.championId,
+                    puuid = myDetail.puuid,
+                    season = detail.info.gameVersion.substring(0,2),
+                    queue = if(detail.info.queueId==420) QueueType.RANKED_SOLO_5x5 else QueueType.RANKED_FLEX_SR
+                )
+            )
         }
     }
 }
