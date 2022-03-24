@@ -160,10 +160,12 @@ class SummonerService(
             }
         }
 
-        summonerChampionsTotal.sortWith(compareBy({ it.played }, { it.wins }))
-        summonerChampionsTotal.reverse()
-        if (summonerChampionsTotal.size > 7) {
-            summonerChampionsTotal = summonerChampionsTotal.subList(0,7)
+        if (summonerChampionsTotal.size > 0) {
+            summonerChampionsTotal.sortWith(compareBy({ it.played }, { it.wins }))
+            summonerChampionsTotal.reverse()
+            if (summonerChampionsTotal.size > 7) {
+                summonerChampionsTotal = summonerChampionsTotal.subList(0,7)
+            }
         }
 
         val summonerChampionsQueue = SummonerChampionStatisticsQueueDTO(
