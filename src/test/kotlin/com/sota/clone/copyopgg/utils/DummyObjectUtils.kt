@@ -57,5 +57,18 @@ class DummyObjectUtils {
             name = RandomStringUtils.random(5, true, true),
             leaguePoints = Random.nextInt()
         )
+
+        fun getSummonerChampionStatistics(cid: Int, queue: Int) = SummonerChampionStatistics(
+            minions_killed_all = Random.nextInt(),
+            kills_all = Random.nextInt(),
+            assists_all = Random.nextInt(),
+            deaths_all = Random.nextInt(),
+            played = Random.nextInt(),
+            wins = Random.nextInt(),
+            champion_id = cid,
+            puuid = "test puuid",
+            season = "test season",
+            queue = if (queue == 0) QueueType.RANKED_SOLO_5x5 else QueueType.RANKED_FLEX_SR
+        )
     }
 }
