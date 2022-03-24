@@ -2,6 +2,7 @@ package com.sota.clone.copyopgg.domain.services
 
 import com.sota.clone.copyopgg.domain.entities.QueueType
 import com.sota.clone.copyopgg.domain.entities.Summoner
+import com.sota.clone.copyopgg.domain.entities.LeagueSummonerPK
 import com.sota.clone.copyopgg.domain.repositories.LeagueRepository
 import com.sota.clone.copyopgg.domain.repositories.LeagueSummonerRepository
 import com.sota.clone.copyopgg.domain.repositories.SummonerChampionStatisticsRepository
@@ -85,7 +86,7 @@ class SummonerService(
             return null
         }
 
-        return this.leagueSummonerRepo.findById(summonerId, league[0].leagueId)?.let {
+        return this.leagueSummonerRepo.findById(LeagueSummonerPK(summonerId, league[0].leagueId))?.let {
             QueueInfoDTO(
                 summonerId = summonerId,
                 leagueId = it.leagueId,

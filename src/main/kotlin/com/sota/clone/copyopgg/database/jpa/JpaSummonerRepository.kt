@@ -11,11 +11,13 @@ import javax.persistence.NoResultException
 import javax.persistence.PersistenceContext
 import org.slf4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.annotation.Primary
 import org.springframework.data.jpa.repository.support.JpaEntityInformation
 import org.springframework.data.jpa.repository.support.JpaEntityInformationSupport
 import org.springframework.data.repository.core.EntityInformation
 import org.springframework.data.repository.core.RepositoryInformation
 
+@Primary
 @Repository
 class JpaSummonerRepository(
     @PersistenceContext
