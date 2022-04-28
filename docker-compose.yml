@@ -1,0 +1,32 @@
+version: '2'
+
+services:
+    postgres:
+        container_name: postgres
+        image: postgres:13.3-alpine
+        restart: always
+        ports:
+        - 15432:5432
+        volumes:
+        - ${LOCAL_HOME}/docker/pgsql/pgdata:/var/lib/postgresql/data
+        environment:
+        - POSTGRES_USER=${POSTGRES_USER}
+        - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    pgadmin:
+        container_name: pgadmin
+        image: dpage/pgadmin4
+        restart: always
+        ports:
+            - 8088:80
+        environment:
+            - PGADMIN_DEFAULT_EMAIL=${PGADMIN_EMAIL}
+            - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_PASSWORD}
+    app:
+        container_name: copy-opgg-backend
+        build: .
+        ports:
+            - 8080:8080
+        depends_on:
+            - postgres
+        environment:
+            - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/
