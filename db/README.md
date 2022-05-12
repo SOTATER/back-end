@@ -4,4 +4,9 @@
 ### DB container run
 ```bash
 docker-compose up -d
+// Sudo can be needed when you are not root.
+```
+#### Only postgresql db run without pgadmin
+```bash
+docker-compose up -d -- postgres
 ```
