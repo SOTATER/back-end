@@ -25,6 +25,12 @@
 
 * 프로젝트 루트에서 `.\gradlew bootRun` 입력
 
+### Docker로 실행
+
+* `.env.default` 파일의 주석 정보를 참고하여 .env 파일 작성
+* 빌드 : `docker-compose build`
+* 실행 : `docker-compose up -d`
+
 
 ### API 문서 확인하기
 
