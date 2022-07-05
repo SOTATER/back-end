@@ -7,9 +7,9 @@ interface MatchRepository {
 
     fun findAll(): List<Match>
 
-    fun findLatest(): Match
+    fun findLatest(): Match?
 
-    fun findLatestMatchByPuuid(puuid: String): Match
+    fun findLatestMatchByPuuid(puuid: String): Match?
 
     fun save(match: Match)
 }
