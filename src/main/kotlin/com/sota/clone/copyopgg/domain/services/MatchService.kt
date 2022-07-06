@@ -1,7 +1,10 @@
 package com.sota.clone.copyopgg.domain.services
 
+import com.sota.clone.copyopgg.domain.dto.ChampionWinRateDto
 import com.sota.clone.copyopgg.domain.dto.MatchDto
+import com.sota.clone.copyopgg.domain.entities.GameType
 import com.sota.clone.copyopgg.domain.entities.Match
+import com.sota.clone.copyopgg.domain.entities.QueueType
 import com.sota.clone.copyopgg.domain.repositories.MatchRepository
 import com.sota.clone.copyopgg.domain.repositories.MatchSummonerRepository
 import com.sota.clone.copyopgg.domain.repositories.MatchTeamRepository
@@ -11,6 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
+import java.lang.Exception
+import java.util.*
 
 @Service
 class MatchService(
@@ -81,5 +86,31 @@ class MatchService(
             matchSummonerRepo.saveAll(match.matchSummoners)
             matchTeamRepo.saveAll(match.matchTeams)
         }
+    }
+
+    fun getMatchesByTypeAndDate(gameType: QueueType, until: Calendar): List<Match> {
+        logger.info("getMatchesByTypeAndDate called")
+        return matchRepo.findByGameCreationLessThan(until.timeInMillis).filter { it.queueId == gameType.getQueueId() }
+    }
+
+    fun getWinRatiosLastSevenDays(puuid: String): List<ChampionWinRateDto> {
+        logger.info("getWinRatiosLastSevenDays")
+        return getMatchesByTypeAndDate(QueueType.RANKED_SOLO_5x5, Calendar.getInstance()).flatMap { match ->
+            match.matchSummoners.filter { it.puuid == puuid }.flatMap { matchSummoner ->
+                match.matchTeams.filter { it.teamId == matchSummoner.teamId }.map { matchTeam ->
+                    matchSummoner.matchSummonerChampion?.let {
+                        Pair(it.championId, matchTeam.win)
+                    } ?: throw Exception()
+                }
+            }
+        }.fold(mutableMapOf<Int, ChampionWinRateDto>()) { container, data ->
+            container.putIfAbsent(data.first!!, ChampionWinRateDto(data.first!!, 0, 0))
+            if (data.second!!) {
+                container[data.first!!]!!.wins++
+            } else {
+                container[data.first!!]!!.losses++
+            }
+            container
+        }.values.toList()
     }
 }

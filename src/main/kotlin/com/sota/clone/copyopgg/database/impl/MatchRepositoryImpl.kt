@@ -31,6 +31,10 @@ class MatchRepositoryImpl(
         this.jpaRepository.save(match)
     }
 
+    override fun findByGameCreationLessThan(gameCreation: Long): List<Match> {
+        return this.jpaRepository.findByGameCreationLessThan(gameCreation)
+    }
+
     fun findLatestMatchInfoByPuuid(puuid: String) {
     }
 }
