@@ -1,6 +1,7 @@
 package com.sota.clone.copyopgg.database.jpa
 
 import com.sota.clone.copyopgg.domain.entities.Match
+import com.sota.clone.copyopgg.domain.entities.QueueType
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
@@ -15,4 +16,5 @@ interface JpaMatchRepository : JpaRepository<Match, String> {
     )
     fun findLatestMatchByPuuid(puuid: String): Match?
 
+    fun findByGameCreationLessThan(gameCreation: Long): List<Match>
 }
