@@ -681,11 +681,11 @@ class MatchTeam {
 }
 
 enum class IndividualPosition {
-    TOP, JUNGLE, MIDDLE, BOTTOM, UTILITY
+    TOP, JUNGLE, MIDDLE, BOTTOM, UTILITY, Invalid
 }
 
 enum class LanePosition {
-    TOP, JUNGLE, MIDDLE, BOTTOM, UTILITY
+    TOP, JUNGLE, MIDDLE, BOTTOM, UTILITY, NONE
 }
 
 enum class MatchRole {

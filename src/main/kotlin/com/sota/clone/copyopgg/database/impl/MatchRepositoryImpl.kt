@@ -23,7 +23,7 @@ class MatchRepositoryImpl(
         return Match()
     }
 
-    override fun findLatestMatchByPuuid(puuid: String): Match {
+    override fun findLatestMatchByPuuid(puuid: String): Match? {
         return jpaRepository.findLatestMatchByPuuid(puuid)
     }
 
