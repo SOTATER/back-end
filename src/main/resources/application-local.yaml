@@ -1,8 +1,8 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/copy-opgg
-    username: sotater
-    password: sotater123
+    url: jdbc:postgresql://postgres:5432/postgres
+    username: admin
+    password: admin
 
 application:
   riotApiKey:
