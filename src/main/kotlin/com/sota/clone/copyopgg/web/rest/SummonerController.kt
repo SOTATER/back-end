@@ -34,6 +34,7 @@ class SummonerController(
         return this.summonerService.getFiveSummonersMatchedPartialName(searchWord).map {
             mapOf(
                 "id" to it.id,
+                "puuid" to it.puuid,
                 "name" to it.name,
                 "profileIconId" to it.profileIconId,
                 "summonerLevel" to it.summonerLevel,
@@ -54,6 +55,7 @@ class SummonerController(
             ResponseEntity.ok().body(
                 mapOf(
                     "id" to it.id,
+                    "puuid" to it.puuid,
                     "name" to it.name,
                     "profileIconId" to it.profileIconId,
                     "summonerLevel" to it.summonerLevel,

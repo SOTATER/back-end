@@ -62,19 +62,21 @@ class RiotApiService(
         return response.body
     }
 
-    fun getMatchIdsByPuuid(puuid: String, params: MatchIdsParams): List<String> {
+    fun getMatchIdsByPuuid(puuid: String, params: MatchIdsParams?): List<String> {
 
         logger.info("Calling Riot API... GET matchIds by puuid")
         val headers = HttpHeaders()
         headers.set("X-Riot-Token", apiKey)
 
-        val uriBuilder = UriComponentsBuilder.fromHttpUrl("$matchBaseUrl/by-puuid/$puuid/ids")
-            .queryParam("startTime", params.startTime)
-            .queryParam("endTime", params.endTime)
-            .queryParam("queue", params.queue)
-            .queryParam("type", params.type)
-            .queryParam("start", params.start)
-            .queryParam("count", params.count)
+        val uriBuilder = params?.let {
+            UriComponentsBuilder.fromHttpUrl("$matchBaseUrl/by-puuid/$puuid/ids")
+                .queryParam("startTime", it.startTime)
+                .queryParam("endTime", it.endTime)
+                .queryParam("queue", it.queue)
+                .queryParam("type", it.type)
+                .queryParam("start", it.start)
+                .queryParam("count", it.count)
+        } ?: UriComponentsBuilder.fromHttpUrl("$matchBaseUrl/by-puuid/$puuid/ids")
 
         val entity = HttpEntity<Any?>(headers)
 
@@ -167,15 +169,15 @@ class RiotApiService(
                 matchSummoner.puuid = participant.puuid
                 matchSummoner.gameEndedInEarlySurrender = participant.gameEndedInEarlySurrender
                 matchSummoner.gameEndedInSurrender = participant.gameEndedInSurrender
-                matchSummoner.individualPosition = IndividualPosition.valueOf(participant.individualPosition)
-                matchSummoner.lane = LanePosition.valueOf(participant.lane)
+                matchSummoner.individualPosition = enumValues<IndividualPosition>().find { participant.individualPosition == it.name }
+                matchSummoner.lane = enumValues<LanePosition>().find { it.name == participant.lane }
                 matchSummoner.participantId = participant.participantId
                 matchSummoner.riotIdName = participant.riotIdName
                 matchSummoner.riotIdTagline = participant.riotIdTagline
                 matchSummoner.role = MatchRole.valueOf(participant.role)
                 matchSummoner.teamEarlySurrendered = participant.teamEarlySurrendered
                 matchSummoner.teamId = participant.teamId
-                matchSummoner.teamPosition = LanePosition.valueOf(participant.teamPosition)
+                matchSummoner.teamPosition = enumValues<LanePosition>().find { it.name == participant.teamPosition }
 
                 val matchSummonerChampion = MatchSummonerChampion()
                 matchSummonerChampion.matchSummoner = matchSummoner

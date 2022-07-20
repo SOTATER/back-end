@@ -13,6 +13,6 @@ interface JpaMatchRepository : JpaRepository<Match, String> {
                 "ORDER BY \"game_creation\" DESC LIMIT 1",
         nativeQuery = true
     )
-    fun findLatestMatchByPuuid(puuid: String): Match
+    fun findLatestMatchByPuuid(puuid: String): Match?
 
 }

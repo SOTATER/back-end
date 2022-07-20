@@ -59,23 +59,23 @@ class MatchService(
 
     fun updateMatchesByPuuid(puuid: String): Int {
         // 현재 저장된 플레이어의 매치 중 가장 최신의 것의 id를 가져온다.
+        logger.info("updateMatchesByPuuid called")
         val latestMatch = matchRepo.findLatestMatchByPuuid(puuid)
         // riot api를 통해 가져올 매치들의 id 목록 가져오기
-        val ids = riotApiService.getMatchIdsByPuuid(
-            puuid,
-            RiotApiService.MatchIdsParams(
-                startTime = latestMatch.gameStartTimestamp!! / 1000
-            )
-        )
+        val ids = latestMatch?.let {
+            riotApiService.getMatchIdsByPuuid(
+                puuid,
+                RiotApiService.MatchIdsParams(
+                    startTime = it.gameStartTimestamp!! / 1000
+                )
+            ).filter { matchId -> matchId != it.id }
+        } ?: riotApiService.getMatchIdsByPuuid(puuid, null)
 
         // 매치 id들을 이용하여 챔피언 통계 update
         updateSummonerChampionStatistics(ids, puuid)
 
         // Riot API를 통해 해당 매치 이후의 매치들을 가져온다
-        ids.forEach { matchId ->
-            if (matchId != latestMatch.id) migrateMatchData(matchId)
-        }
-
+        ids.forEach { matchId -> migrateMatchData(matchId) }
         return ids.size - 1
     }
 
