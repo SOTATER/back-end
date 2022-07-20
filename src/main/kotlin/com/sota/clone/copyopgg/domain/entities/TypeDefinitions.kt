@@ -41,7 +41,15 @@ enum class GameMode {
 }
 
 enum class QueueType {
-    RANKED_SOLO_5x5, RANKED_FLEX_SR, RANKED_FLEX_TT
+    RANKED_SOLO_5x5, RANKED_FLEX_SR, RANKED_FLEX_TT;
+
+    fun getQueueId(): Int {
+        return when (this) {
+            RANKED_SOLO_5x5 -> 420
+            RANKED_FLEX_SR -> 440
+            RANKED_FLEX_TT -> 470
+        }
+    }
 }
 
 enum class Tier {
