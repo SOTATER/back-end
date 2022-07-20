@@ -6,6 +6,7 @@ import com.sota.clone.copyopgg.domain.services.RiotApiService
 import com.sota.clone.copyopgg.domain.services.SummonerService
 import com.sota.clone.copyopgg.domain.services.SynchronizeService
 import com.sota.clone.copyopgg.web.dto.summoners.QueueInfoDTO
+import com.sota.clone.copyopgg.web.dto.summoners.SummonerChampionStatisticsQueueDTO
 import io.swagger.annotations.ApiOperation
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -109,6 +110,17 @@ class SummonerController(
                     false
                 }
             )
+        )
+    }
+
+    @GetMapping("/{puuid}/statistics/champion")
+    fun getSummonerChampionStatistics(
+        @PathVariable(name = "puuid",required = true) puuid: String,
+        @RequestParam(value = "season", required = true) season: String
+    ): ResponseEntity<SummonerChampionStatisticsQueueDTO> {
+        logger.info("Get summoner champion statistics with $season")
+        return ResponseEntity.ok().body(
+            this.summonerService.getSummonerChampionStatistics(puuid, season)
         )
     }
 }

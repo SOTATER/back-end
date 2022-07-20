@@ -5,9 +5,12 @@ import com.sota.clone.copyopgg.domain.entities.Summoner
 import com.sota.clone.copyopgg.domain.entities.LeagueSummonerPK
 import com.sota.clone.copyopgg.domain.repositories.LeagueRepository
 import com.sota.clone.copyopgg.domain.repositories.LeagueSummonerRepository
+import com.sota.clone.copyopgg.domain.repositories.SummonerChampionStatisticsRepository
 import com.sota.clone.copyopgg.domain.repositories.SummonerRepository
 import com.sota.clone.copyopgg.web.dto.summoners.QueueInfoDTO
 import com.sota.clone.copyopgg.web.dto.summoners.SummonerDTO
+import com.sota.clone.copyopgg.web.dto.summoners.SummonerChampionStatisticsDTO
+import com.sota.clone.copyopgg.web.dto.summoners.SummonerChampionStatisticsQueueDTO
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -16,6 +19,7 @@ import java.lang.Exception
 @Service
 class SummonerService(
     @Autowired val summonerRepo: SummonerRepository,
+    @Autowired val summonerChampionStatisticsRepo: SummonerChampionStatisticsRepository,
     @Autowired val leagueSummonerRepo: LeagueSummonerRepository,
     @Autowired val leagueRepository: LeagueRepository,
     @Autowired val riotApiService: RiotApiService
@@ -95,5 +99,75 @@ class SummonerService(
                 queue = queueType
             )
         }
+    }
+
+    fun getSummonerChampionStatistics(puuid: String, season: String): SummonerChampionStatisticsQueueDTO? {
+        logger.info("getSummonerChampionStatistics called")
+        val summonerChampionStatsitics = this.summonerChampionStatisticsRepo.findByPuuidSeason(puuid, season)
+
+        val summonerChampionsSoloQueue = mutableListOf<SummonerChampionStatisticsDTO>()
+        val summonerChampionsFlexQueue = mutableListOf<SummonerChampionStatisticsDTO>()
+        val summonerChampionsTotalMap = mutableMapOf<Int,SummonerChampionStatisticsDTO>()
+
+        summonerChampionStatsitics.forEach {
+            if (it.queue == QueueType.RANKED_SOLO_5x5 && summonerChampionsSoloQueue.size < 7) {
+                summonerChampionsSoloQueue.add(
+                    SummonerChampionStatisticsDTO(
+                        minionsKilledAll = it.minions_killed_all,
+                        killsAll = it.kills_all,
+                        assistsAll = it.assists_all,
+                        deathsAll = it.deaths_all,
+                        played = it.played,
+                        wins = it.wins,
+                        championId = it.champion_id,
+                        puuid = it.puuid,
+                        season = it.season
+                    )
+                )
+            }
+            else if (it.queue == QueueType.RANKED_FLEX_SR && summonerChampionsFlexQueue.size < 7) {
+                summonerChampionsFlexQueue.add(
+                    SummonerChampionStatisticsDTO(
+                        minionsKilledAll = it.minions_killed_all,
+                        killsAll = it.kills_all,
+                        assistsAll = it.assists_all,
+                        deathsAll = it.deaths_all,
+                        played = it.played,
+                        wins = it.wins,
+                        championId = it.champion_id,
+                        puuid = it.puuid,
+                        season = it.season
+                    )
+                )
+            }
+            summonerChampionsTotalMap[it.champion_id]?.addQueueType(it) ?: run {
+                summonerChampionsTotalMap[it.champion_id] =
+                    SummonerChampionStatisticsDTO(
+                        minionsKilledAll = it.minions_killed_all,
+                        killsAll = it.kills_all,
+                        assistsAll = it.assists_all,
+                        deathsAll = it.deaths_all,
+                        played = it.played,
+                        wins = it.wins,
+                        championId = it.champion_id,
+                        puuid = it.puuid,
+                        season = it.season
+                    )
+            }
+        }
+
+        var summonerChampionsTotalList = summonerChampionsTotalMap.values.toMutableList()
+        if (summonerChampionsTotalList.size > 0) {
+            summonerChampionsTotalList.sortWith(compareBy({ it.played }, { it.wins }))
+            summonerChampionsTotalList.reverse()
+            if (summonerChampionsTotalList.size > 7) {
+                summonerChampionsTotalList = summonerChampionsTotalList.subList(0,7)
+            }
+        }
+
+        val summonerChampionsQueue = SummonerChampionStatisticsQueueDTO(
+            summonerChampionsSoloQueue, summonerChampionsFlexQueue, summonerChampionsTotalList)
+
+        return summonerChampionsQueue
     }
 }

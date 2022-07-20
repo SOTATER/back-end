@@ -1,14 +1,18 @@
 package com.sota.clone.copyopgg.domain.services
 
 import com.sota.clone.copyopgg.domain.entities.QueueType
+import com.sota.clone.copyopgg.domain.entities.SummonerChampionStatistics
 import com.sota.clone.copyopgg.domain.repositories.LeagueRepository
 import com.sota.clone.copyopgg.domain.repositories.LeagueSummonerRepository
 import com.sota.clone.copyopgg.domain.repositories.SummonerRepository
+import com.sota.clone.copyopgg.domain.repositories.SummonerChampionStatisticsRepository
 import com.sota.clone.copyopgg.utils.ConvertDataUtils.Companion.replaceQueueType
 import com.sota.clone.copyopgg.utils.ConvertDataUtils.Companion.toDTO
 import com.sota.clone.copyopgg.utils.DummyObjectUtils
 import com.sota.clone.copyopgg.web.dto.summoners.QueueInfoDTO
 import com.sota.clone.copyopgg.web.dto.summoners.SummonerDTO
+import com.sota.clone.copyopgg.web.dto.summoners.SummonerChampionStatisticsDTO
+import com.sota.clone.copyopgg.web.dto.summoners.SummonerChampionStatisticsQueueDTO
 import io.mockk.*
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
@@ -24,6 +28,9 @@ import kotlin.test.assertEquals
 class SummonerServiceTest {
     @MockK
     private lateinit var summonerRepository: SummonerRepository
+
+    @MockK
+    private lateinit var summonerChampionStatisticsRepository: SummonerChampionStatisticsRepository
 
     @MockK
     private lateinit var leagueSummonerRepository: LeagueSummonerRepository
@@ -189,5 +196,52 @@ class SummonerServiceTest {
 
         // verify
         assertEquals(expected = null, actual)
+    }
+
+    @Test
+    fun `Test getSummonerChampionStatistics`() {
+        // given
+        val testSummoner = DummyObjectUtils.getSummoner()
+        val puuid = testSummoner.puuid
+        val testSummonerChampionStatistics = mutableListOf<SummonerChampionStatistics>()
+        for (i in 0..15) {
+            testSummonerChampionStatistics.add(DummyObjectUtils.getSummonerChampionStatistics(i,0))
+            testSummonerChampionStatistics.add(DummyObjectUtils.getSummonerChampionStatistics(i,1))
+        }
+
+        every { summonerChampionStatisticsRepository.findByPuuidSeason(any(), any()) } returns testSummonerChampionStatistics
+
+        // when
+        val actual = summonerService.getSummonerChampionStatistics(puuid, "test season")
+
+        // verify
+        assertEquals(actual!!.rankedSoloFF!!.size, 7)
+        assertEquals(actual.rankedFlexSR!!.size, 7)
+        assertEquals(actual.total!!.size, 7)
+        verify (exactly = 1) {
+            summonerChampionStatisticsRepository.findByPuuidSeason(any(), any())
+        }
+    }
+
+    @Test
+    fun `Test getSummonerChampionStatistics when no exist SummonerChampionStatistics at all`() {
+        // given
+        val testSummoner = DummyObjectUtils.getSummoner()
+        val puuid = testSummoner.puuid
+        every { summonerChampionStatisticsRepository.findByPuuidSeason(any(), any())} returns listOf()
+
+        // when
+        val actual = summonerService.getSummonerChampionStatistics(puuid, "tester")
+
+        // verify
+        val expected = SummonerChampionStatisticsQueueDTO(
+            listOf(),
+            listOf(),
+            listOf()
+        )
+        assertEquals(expected, actual)
+        verify (exactly = 1) {
+            summonerChampionStatisticsRepository.findByPuuidSeason(any(), any())
+        }
     }
 }

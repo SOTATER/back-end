@@ -30,6 +30,20 @@ create table if not exists league_summoner (
   primary key("summoner_id")
 );
 
+create table if not exists summoner_champion_statistics (
+    "minions_killed_all" integer not null,
+    "kills_all" integer not null,
+    "assists_all" integer not null,
+    "deaths_all" integer not null,
+    "played" integer not null,
+    "wins" integer not null,
+    "champion_id" smallint not null,
+    "puuid" varchar(78) not null,
+    "season" varchar(63) not null,
+    "queue" queue not null,
+    primary key ("champion_id", "puuid", "season", "queue")
+);
+
 create table if not exists matches (
     "match_id" char(13) not null,
     "data_version" varchar not null,
