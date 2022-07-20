@@ -3,7 +3,9 @@ version: '2'
 services:
     postgres:
         container_name: postgres
-        image: postgres:13.3-alpine
+        build:
+            context: .
+            dockerfile: ./docker/db/Dockerfile
         restart: always
         ports:
         - 15432:5432
@@ -23,10 +25,8 @@ services:
             - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_PASSWORD}
     app:
         container_name: copy-opgg-backend
-        build: .
+        build:
+            context: .
+            dockerfile: ./docker/app/Dockerfile
         ports:
             - 8080:8080
-        depends_on:
-            - postgres
-        environment:
-            - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/
