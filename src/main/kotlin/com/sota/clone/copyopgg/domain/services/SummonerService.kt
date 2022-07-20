@@ -105,9 +105,9 @@ class SummonerService(
         logger.info("getSummonerChampionStatistics called")
         val summonerChampionStatsitics = this.summonerChampionStatisticsRepo.findByPuuidSeason(puuid, season)
 
-        var summonerChampionsSoloQueue = mutableListOf<SummonerChampionStatisticsDTO>()
-        var summonerChampionsFlexQueue = mutableListOf<SummonerChampionStatisticsDTO>()
-        var summonerChampionsTotal = mutableListOf<SummonerChampionStatisticsDTO>()
+        val summonerChampionsSoloQueue = mutableListOf<SummonerChampionStatisticsDTO>()
+        val summonerChampionsFlexQueue = mutableListOf<SummonerChampionStatisticsDTO>()
+        val summonerChampionsTotalMap = mutableMapOf<Int,SummonerChampionStatisticsDTO>()
 
         summonerChampionStatsitics.forEach {
             if (it.queue == QueueType.RANKED_SOLO_5x5 && summonerChampionsSoloQueue.size < 7) {
@@ -140,9 +140,8 @@ class SummonerService(
                     )
                 )
             }
-            val index = summonerChampionsTotal.find { total -> total.championId == it.champion_id }
-            if (index == null) {
-                summonerChampionsTotal.add(
+            summonerChampionsTotalMap[it.champion_id]?.addQueueType(it) ?: run {
+                summonerChampionsTotalMap[it.champion_id] =
                     SummonerChampionStatisticsDTO(
                         minionsKilledAll = it.minions_killed_all,
                         killsAll = it.kills_all,
@@ -154,23 +153,20 @@ class SummonerService(
                         puuid = it.puuid,
                         season = it.season
                     )
-                )
-            }
-            else {
-                index.addQueueType(it)
             }
         }
 
-        if (summonerChampionsTotal.size > 0) {
-            summonerChampionsTotal.sortWith(compareBy({ it.played }, { it.wins }))
-            summonerChampionsTotal.reverse()
-            if (summonerChampionsTotal.size > 7) {
-                summonerChampionsTotal = summonerChampionsTotal.subList(0,7)
+        var summonerChampionsTotalList = summonerChampionsTotalMap.values.toMutableList()
+        if (summonerChampionsTotalList.size > 0) {
+            summonerChampionsTotalList.sortWith(compareBy({ it.played }, { it.wins }))
+            summonerChampionsTotalList.reverse()
+            if (summonerChampionsTotalList.size > 7) {
+                summonerChampionsTotalList = summonerChampionsTotalList.subList(0,7)
             }
         }
 
         val summonerChampionsQueue = SummonerChampionStatisticsQueueDTO(
-            summonerChampionsSoloQueue, summonerChampionsFlexQueue, summonerChampionsTotal)
+            summonerChampionsSoloQueue, summonerChampionsFlexQueue, summonerChampionsTotalList)
 
         return summonerChampionsQueue
     }

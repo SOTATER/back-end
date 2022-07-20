@@ -92,14 +92,16 @@ class MatchService(
 
     private fun updateSummonerChampionStatistics(ids: List<String>, puuid: String) {
         //ids 읽으면서 summonerChampionrepo에 save
+        val mySummonerChampionStatisticsList = mutableListOf<SummonerChampionStatistics>()
         ids.forEach { matchId ->
-            val detail = riotApiService.getMatchDetail(matchId)
-            val myDetail = detail!!.info.participants.find({ i -> i.puuid == puuid})
-            if (detail.info.queueId != 420 && detail.info.queueId != 440)
+            val detail = riotApiService.getMatchDetail(matchId) ?: return@forEach
+            val myDetail = detail.info.participants.find({ i -> i.puuid == puuid}) ?: return@forEach
+            if (detail.info.queueId != 420 && detail.info.queueId != 440) {
                 return@forEach
-            summonerChampionStatisticsRepo.save(
+            }
+            mySummonerChampionStatisticsList.add(
                 SummonerChampionStatistics(
-                    minions_killed_all = myDetail!!.totalMinionsKilled,
+                    minions_killed_all = myDetail.totalMinionsKilled,
                     kills_all = myDetail.kills,
                     assists_all = myDetail.assists,
                     deaths_all = myDetail.deaths,
@@ -110,7 +112,9 @@ class MatchService(
                     season = detail.info.gameVersion.substring(0,2),
                     queue = if(detail.info.queueId==420) QueueType.RANKED_SOLO_5x5 else QueueType.RANKED_FLEX_SR
                 )
+
             )
         }
+        summonerChampionStatisticsRepo.saveAll(mySummonerChampionStatisticsList)
     }
 }
