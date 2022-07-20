@@ -111,7 +111,7 @@ class SummonerController(
         )
     }
 
-    @GetMapping("/champion/statistics/{puuid}")
+    @GetMapping("/{puuid}/statistics/champion")
     fun getSummonerChampionStatistics(
         @PathVariable(name = "puuid",required = true) puuid: String,
         @RequestParam(value = "season", required = true) season: String
