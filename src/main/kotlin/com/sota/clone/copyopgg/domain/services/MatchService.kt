@@ -8,6 +8,7 @@ import com.sota.clone.copyopgg.domain.repositories.MatchRepository
 import com.sota.clone.copyopgg.domain.repositories.MatchSummonerRepository
 import com.sota.clone.copyopgg.domain.repositories.MatchTeamRepository
 import com.sota.clone.copyopgg.domain.repositories.SummonerChampionStatisticsRepository
+import com.sota.clone.copyopgg.web.dto.match.MatchSummaryDTO
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -25,35 +26,29 @@ class MatchService(
     val logger: Logger = LoggerFactory.getLogger(MatchService::class.java)
 ) {
 
-    fun getMatchSummariesByPuuid(puuid: String, page: Int, pageSize: Int): List<Map<String, Any?>> {
+    fun getMatchSummariesByPuuid(puuid: String, page: Int, pageSize: Int): List<MatchSummaryDTO> {
         val pageable: Pageable = PageRequest.of(page, pageSize)
         val matchSummoners = matchSummonerRepo.findByPuuid(puuid, pageable)
 
-
-        return List(matchSummoners.size) {
-            val matchSummoner = matchSummoners[it]
-            try {
-                mapOf(
-                    "champion" to matchSummoner.matchSummonerChampion!!.championId,
-                    "spell1" to matchSummoner.matchSummonerChampion!!.summoner1Id,
-                    "spell2" to matchSummoner.matchSummonerChampion!!.summoner2Id,
-                    "kills" to matchSummoner.matchSummonerCombat!!.kills,
-                    "deaths" to matchSummoner.matchSummonerCombat!!.deaths,
-                    "assists" to matchSummoner.matchSummonerCombat!!.assists,
-                    "level" to matchSummoner.matchSummonerChampion!!.champLevel,
-                    "cs" to matchSummoner.matchSummonerObjective!!.totalMinionsKilled!! + matchSummoner.matchSummonerObjective!!.neutralMinionsKilled!!,
-                    "item0" to matchSummoner.matchSummonerItem!!.item0,
-                    "item1" to matchSummoner.matchSummonerItem!!.item1,
-                    "item2" to matchSummoner.matchSummonerItem!!.item2,
-                    "item3" to matchSummoner.matchSummonerItem!!.item3,
-                    "item4" to matchSummoner.matchSummonerItem!!.item4,
-                    "item5" to matchSummoner.matchSummonerItem!!.item5,
-                    "item6" to matchSummoner.matchSummonerItem!!.item6,
-                    "detectorWardsPlaced" to matchSummoner.matchSummonerVision!!.detectorWardsPlaced,
-                )
-            } catch (e: Error) {
-                mapOf()
-            }
+        return matchSummoners.map { matchSummoner ->
+            MatchSummaryDTO(
+                champion = matchSummoner.matchSummonerChampion!!.championId,
+                spell1 = matchSummoner.matchSummonerChampion!!.summoner1Id,
+                spell2 = matchSummoner.matchSummonerChampion!!.summoner2Id,
+                kills = matchSummoner.matchSummonerCombat!!.kills,
+                deaths = matchSummoner.matchSummonerCombat!!.deaths,
+                assists = matchSummoner.matchSummonerCombat!!.assists,
+                level = matchSummoner.matchSummonerChampion!!.champLevel,
+                cs = matchSummoner.matchSummonerObjective!!.totalMinionsKilled!! + matchSummoner.matchSummonerObjective!!.neutralMinionsKilled!!,
+                item0 = matchSummoner.matchSummonerItem!!.item0,
+                item1 = matchSummoner.matchSummonerItem!!.item1,
+                item2 = matchSummoner.matchSummonerItem!!.item2,
+                item3 = matchSummoner.matchSummonerItem!!.item3,
+                item4 = matchSummoner.matchSummonerItem!!.item4,
+                item5 = matchSummoner.matchSummonerItem!!.item5,
+                item6 = matchSummoner.matchSummonerItem!!.item6,
+                detectorWardsPlaced = matchSummoner.matchSummonerVision!!.detectorWardsPlaced,
+            )
         }
     }
 
