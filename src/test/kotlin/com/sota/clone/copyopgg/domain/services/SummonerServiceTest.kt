@@ -147,7 +147,7 @@ class SummonerServiceTest {
         val league = DummyObjectUtils.getLeague()
         every { leagueSummonerRepository.findBySummonerId(any()) } returns summoners
         every { leagueRepository.findById(any())} returns league
-        every { leagueSummonerRepository.findById(any(), any()) } returns leagueSummoner
+        every { leagueSummonerRepository.findById(any()) } returns leagueSummoner
 
         // when
         val actual = summonerService.getSummonerQueueInfo(leagueSummoner.summonerId, QueueType.RANKED_SOLO_5x5)
@@ -177,7 +177,7 @@ class SummonerServiceTest {
         val league = DummyObjectUtils.getLeague().replaceQueueType(QueueType.RANKED_FLEX_SR)
         every { leagueSummonerRepository.findBySummonerId(any()) } returns summoners
         every { leagueRepository.findById(any())} returns league
-        every { leagueSummonerRepository.findById(any(), any()) } returns leagueSummoner
+        every { leagueSummonerRepository.findById(any()) } returns leagueSummoner
 
         // when
         val actual = summonerService.getSummonerQueueInfo(leagueSummoner.summonerId, QueueType.RANKED_SOLO_5x5)
