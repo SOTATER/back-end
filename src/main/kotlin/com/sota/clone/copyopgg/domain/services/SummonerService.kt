@@ -9,6 +9,7 @@ import com.sota.clone.copyopgg.domain.repositories.SummonerChampionStatisticsRep
 import com.sota.clone.copyopgg.domain.repositories.SummonerRepository
 import com.sota.clone.copyopgg.web.dto.summoners.QueueInfoDTO
 import com.sota.clone.copyopgg.web.dto.summoners.SummonerDTO
+import com.sota.clone.copyopgg.web.dto.summoners.SummonerInfoDTO
 import com.sota.clone.copyopgg.web.dto.summoners.SummonerChampionStatisticsDTO
 import com.sota.clone.copyopgg.web.dto.summoners.SummonerChampionStatisticsQueueDTO
 import org.slf4j.LoggerFactory
@@ -26,33 +27,31 @@ class SummonerService(
 ) {
     val logger = LoggerFactory.getLogger(SummonerService::class.java)
 
-    fun getFiveSummonersMatchedPartialName(partialName: String): List<SummonerDTO> {
+    fun getFiveSummonersMatchedPartialName(partialName: String): List<SummonerInfoDTO> {
         logger.info("getFiveSummonersMatchedPartialName called")
         var list = this.summonerRepo.findSummonersByPartialName(partialName, 5)
         return list.map {
-            SummonerDTO(
-                accountId = it.accountId,
-                profileIconId = it.profileIconId,
-                revisionDate = it.revisionDate,
-                name = it.name,
+            SummonerInfoDTO(
                 id = it.id,
                 puuid = it.puuid,
-                summonerLevel = it.summonerLevel
+                name = it.name,
+                profileIconId = it.profileIconId,
+                summonerLevel = it.summonerLevel,
+                leagueInfo = null,
             )
         }
     }
 
-    fun getSummonerByName(name: String): SummonerDTO? {
+    fun getSummonerByName(name: String): SummonerInfoDTO? {
         logger.info("getSummonerByName called")
         return this.summonerRepo.findByName(name)?.let {
-            SummonerDTO(
-                accountId = it.accountId,
-                profileIconId = it.profileIconId,
-                revisionDate = it.revisionDate,
-                name = it.name,
+            SummonerInfoDTO(
                 id = it.id,
                 puuid = it.puuid,
-                summonerLevel = it.summonerLevel
+                name = it.name,
+                profileIconId = it.profileIconId,
+                summonerLevel = it.summonerLevel,
+                leagueInfo = null,
             )
         } ?: riotApiService.getSummoner(name)?.let {
             this.summonerRepo.save(
@@ -66,7 +65,14 @@ class SummonerService(
                     summonerLevel = it.summonerLevel!!
                 )
             )
-            it
+            SummonerInfoDTO(
+                id = it.id,
+                puuid = it.puuid,
+                name = it.name,
+                profileIconId = it.profileIconId,
+                summonerLevel = it.summonerLevel,
+                leagueInfo = null,
+            )
         }
     }
 

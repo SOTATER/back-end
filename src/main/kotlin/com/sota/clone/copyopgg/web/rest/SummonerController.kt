@@ -6,11 +6,13 @@ import com.sota.clone.copyopgg.domain.services.RiotApiService
 import com.sota.clone.copyopgg.domain.services.SummonerService
 import com.sota.clone.copyopgg.domain.services.SynchronizeService
 import com.sota.clone.copyopgg.web.dto.summoners.QueueInfoDTO
+import com.sota.clone.copyopgg.web.dto.summoners.SummonerInfoDTO
 import com.sota.clone.copyopgg.web.dto.summoners.SummonerChampionStatisticsQueueDTO
 import io.swagger.annotations.ApiOperation
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
@@ -29,17 +31,12 @@ class SummonerController(
             name = "searchWord",
             required = true
         ) searchWord: String
-    ): Iterable<Map<String, Any?>> {
+    ): ResponseEntity<List<SummonerInfoDTO>> {
         logger.info("Searching for summoner names that start with '$searchWord'")
-        return this.summonerService.getFiveSummonersMatchedPartialName(searchWord).map {
-            mapOf(
-                "id" to it.id,
-                "puuid" to it.puuid,
-                "name" to it.name,
-                "profileIconId" to it.profileIconId,
-                "summonerLevel" to it.summonerLevel,
-                "leagueInfo" to null
-            )
+        return try {
+            ResponseEntity.ok(summonerService.getFiveSummonersMatchedPartialName(searchWord))
+        } catch (e: Error) {
+            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(listOf())
         }
     }
 
@@ -49,19 +46,10 @@ class SummonerController(
             name = "searchWord",
             required = true
         ) searchWord: String
-    ): ResponseEntity<Map<String, Any?>> {
+    ): ResponseEntity<SummonerInfoDTO> {
         logger.info("Searching for summoner information named '$searchWord'")
         return this.summonerService.getSummonerByName(searchWord)?.let {
-            ResponseEntity.ok().body(
-                mapOf(
-                    "id" to it.id,
-                    "puuid" to it.puuid,
-                    "name" to it.name,
-                    "profileIconId" to it.profileIconId,
-                    "summonerLevel" to it.summonerLevel,
-                    "leagueInfo" to null
-                )
-            )
+            ResponseEntity.ok().body(it)
         } ?: ResponseEntity.notFound().build()
     }
 
