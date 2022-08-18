@@ -59,12 +59,12 @@ class MatchServiceTest {
 
         val match = DummyObjectUtils.getMatch(matchSummoner, matchTeam)
 
-        match.queueId = QueueType.RANKED_SOLO_5x5.getQueueId()
+        match.queueId = QueueType.RANKED_SOLO_5x5.queueId
 
         matchSummoner.match = match
         matchTeam.match = match
 
-        every { matchRepository.findByGameCreationLessThan(any()) } returns listOf(match)
+        every { matchRepository.findByGameCreationLessThanAndQueueId(any(), any()) } returns listOf(match)
 
         val expected = listOf(ChampionWinRateDto(
             championId = matchSummoner.matchSummonerChampion!!.championId!!,

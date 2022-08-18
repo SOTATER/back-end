@@ -11,7 +11,7 @@ interface MatchRepository {
 
     fun findLatestMatchByPuuid(puuid: String): Match?
 
-    fun findByGameCreationLessThan(gameCreation: Long): List<Match>
+    fun findByGameCreationLessThanAndQueueId(gameCreation: Long, queueId: Int): List<Match>
 
     fun save(match: Match)
 }

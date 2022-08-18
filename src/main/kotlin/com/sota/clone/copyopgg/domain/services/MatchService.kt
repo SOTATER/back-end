@@ -119,7 +119,7 @@ class MatchService(
 
     fun getMatchesByTypeAndDate(gameType: QueueType, until: Calendar): List<Match> {
         logger.info("getMatchesByTypeAndDate called")
-        return matchRepo.findByGameCreationLessThan(until.timeInMillis).filter { it.queueId == gameType.getQueueId() }
+        return matchRepo.findByGameCreationLessThanAndQueueId(until.timeInMillis, gameType.queueId)
     }
 
     fun getWinRatiosLastSevenDays(puuid: String): List<ChampionWinRateDto> {
