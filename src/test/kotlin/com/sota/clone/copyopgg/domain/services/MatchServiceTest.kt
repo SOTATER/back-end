@@ -6,6 +6,7 @@ import com.sota.clone.copyopgg.domain.entities.QueueType
 import com.sota.clone.copyopgg.domain.repositories.MatchRepository
 import com.sota.clone.copyopgg.domain.repositories.MatchSummonerRepository
 import com.sota.clone.copyopgg.domain.repositories.MatchTeamRepository
+import com.sota.clone.copyopgg.domain.repositories.SummonerChampionStatisticsRepository
 import com.sota.clone.copyopgg.utils.DummyObjectUtils
 import io.mockk.MockKAnnotations
 import io.mockk.every
@@ -33,6 +34,9 @@ class MatchServiceTest {
 
     @MockK
     private lateinit var riotApiService: RiotApiService
+
+    @MockK
+    private lateinit var summonerChampionSTatisticsRepository: SummonerChampionStatisticsRepository
 
     @InjectMockKs
     @SpyK

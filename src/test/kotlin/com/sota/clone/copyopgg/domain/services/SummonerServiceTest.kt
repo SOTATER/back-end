@@ -8,11 +8,9 @@ import com.sota.clone.copyopgg.domain.repositories.SummonerRepository
 import com.sota.clone.copyopgg.domain.repositories.SummonerChampionStatisticsRepository
 import com.sota.clone.copyopgg.utils.ConvertDataUtils.Companion.replaceQueueType
 import com.sota.clone.copyopgg.utils.ConvertDataUtils.Companion.toDTO
+import com.sota.clone.copyopgg.utils.ConvertDataUtils.Companion.toInfoDTO
 import com.sota.clone.copyopgg.utils.DummyObjectUtils
-import com.sota.clone.copyopgg.web.dto.summoners.QueueInfoDTO
-import com.sota.clone.copyopgg.web.dto.summoners.SummonerDTO
-import com.sota.clone.copyopgg.web.dto.summoners.SummonerChampionStatisticsDTO
-import com.sota.clone.copyopgg.web.dto.summoners.SummonerChampionStatisticsQueueDTO
+import com.sota.clone.copyopgg.web.dto.summoners.*
 import io.mockk.*
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
@@ -65,7 +63,7 @@ class SummonerServiceTest {
         val actual = summonerService.getFiveSummonersMatchedPartialName("tester")
 
         // verify
-        val expected = listOf(testSummoner.toDTO())
+        val expected = listOf(testSummoner.toInfoDTO())
         assertEquals(expected, actual)
     }
 
@@ -78,7 +76,7 @@ class SummonerServiceTest {
         val actual = summonerService.getFiveSummonersMatchedPartialName("tester")
 
         // verify
-        val expected = listOf<SummonerDTO>()
+        val expected = listOf<SummonerInfoDTO>()
         assertEquals(expected, actual)
     }
 
@@ -92,23 +90,23 @@ class SummonerServiceTest {
         val actual = summonerService.getSummonerByName("tester")
 
         // verify
-        val expected = testSummoner.toDTO()
+        val expected = testSummoner.toInfoDTO()
         assertEquals(expected, actual)
     }
 
     @Test
     fun `Test GetSummonerByName when no such summoner exists in DB`() {
         // given
-        val testSummonerDTO = DummyObjectUtils.getSummoner().toDTO()
+        val testSummoner = DummyObjectUtils.getSummoner()
         every { summonerRepository.findByName(any()) } returns null
         every { summonerRepository.save(any()) } just Runs
-        every { riotApiService.getSummoner(any()) } returns testSummonerDTO
+        every { riotApiService.getSummoner(any()) } returns testSummoner.toDTO()
 
         // when
         val actual = summonerService.getSummonerByName("tester")
 
         // verify
-        assertEquals(expected = testSummonerDTO, actual)
+        assertEquals(expected = testSummoner.toInfoDTO(), actual)
         verifySequence {
             summonerRepository.findByName(any())
             riotApiService.getSummoner(any())
