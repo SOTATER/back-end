@@ -169,15 +169,15 @@ class RiotApiService(
                 matchSummoner.puuid = participant.puuid
                 matchSummoner.gameEndedInEarlySurrender = participant.gameEndedInEarlySurrender
                 matchSummoner.gameEndedInSurrender = participant.gameEndedInSurrender
-                matchSummoner.individualPosition = enumValues<IndividualPosition>().find { participant.individualPosition == it.name }
-                matchSummoner.lane = enumValues<LanePosition>().find { it.name == participant.lane }
+                matchSummoner.individualPosition = IndividualPosition.fromName(participant.individualPosition)
+                matchSummoner.lane = LanePosition.fromName(participant.lane)
                 matchSummoner.participantId = participant.participantId
                 matchSummoner.riotIdName = participant.riotIdName
                 matchSummoner.riotIdTagline = participant.riotIdTagline
                 matchSummoner.role = MatchRole.valueOf(participant.role)
                 matchSummoner.teamEarlySurrendered = participant.teamEarlySurrendered
                 matchSummoner.teamId = participant.teamId
-                matchSummoner.teamPosition = enumValues<LanePosition>().find { it.name == participant.teamPosition }
+                matchSummoner.teamPosition = LanePosition.fromName(participant.teamPosition)
 
                 val matchSummonerChampion = MatchSummonerChampion()
                 matchSummonerChampion.matchSummoner = matchSummoner
