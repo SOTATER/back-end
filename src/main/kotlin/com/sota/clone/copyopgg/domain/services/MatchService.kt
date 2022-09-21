@@ -1,6 +1,8 @@
 package com.sota.clone.copyopgg.domain.services
 
+import com.sota.clone.copyopgg.domain.dto.ChampionWinRateDto
 import com.sota.clone.copyopgg.domain.dto.MatchDto
+import com.sota.clone.copyopgg.domain.entities.GameType
 import com.sota.clone.copyopgg.domain.entities.Match
 import com.sota.clone.copyopgg.domain.entities.SummonerChampionStatistics
 import com.sota.clone.copyopgg.domain.entities.QueueType
@@ -15,6 +17,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
+import java.lang.Exception
+import java.util.*
 
 @Service
 class MatchService(
@@ -90,7 +94,7 @@ class MatchService(
         val mySummonerChampionStatisticsList = mutableListOf<SummonerChampionStatistics>()
         ids.forEach { matchId ->
             val detail = riotApiService.getMatchDetail(matchId) ?: return@forEach
-            val myDetail = detail.info.participants.find({ i -> i.puuid == puuid}) ?: return@forEach
+            val myDetail = detail.info.participants.find({ i -> i.puuid == puuid }) ?: return@forEach
             if (detail.info.queueId != 420 && detail.info.queueId != 440) {
                 return@forEach
             }
@@ -104,12 +108,38 @@ class MatchService(
                     wins = if (myDetail.win) 1 else 0,
                     champion_id = myDetail.championId,
                     puuid = myDetail.puuid,
-                    season = detail.info.gameVersion.substring(0,2),
-                    queue = if(detail.info.queueId==420) QueueType.RANKED_SOLO_5x5 else QueueType.RANKED_FLEX_SR
+                    season = detail.info.gameVersion.substring(0, 2),
+                    queue = if (detail.info.queueId == 420) QueueType.RANKED_SOLO_5x5 else QueueType.RANKED_FLEX_SR
                 )
 
             )
         }
         summonerChampionStatisticsRepo.saveAll(mySummonerChampionStatisticsList)
+    }
+
+    fun getMatchesByTypeAndDate(gameType: QueueType, until: Calendar): List<Match> {
+        logger.info("getMatchesByTypeAndDate called")
+        return matchRepo.findByGameCreationLessThanAndQueueId(until.timeInMillis, gameType.queueId)
+    }
+
+    fun getWinRatiosLastSevenDays(puuid: String): List<ChampionWinRateDto> {
+        logger.info("getWinRatiosLastSevenDays")
+        return getMatchesByTypeAndDate(QueueType.RANKED_SOLO_5x5, Calendar.getInstance()).flatMap { match ->
+            match.matchSummoners.filter { it.puuid == puuid }.flatMap { matchSummoner ->
+                match.matchTeams.filter { it.teamId == matchSummoner.teamId }.map { matchTeam ->
+                    matchSummoner.matchSummonerChampion?.let {
+                        Pair(it.championId, matchTeam.win)
+                    } ?: throw Exception()
+                }
+            }
+        }.fold(mutableMapOf<Int, ChampionWinRateDto>()) { container, data ->
+            container.putIfAbsent(data.first!!, ChampionWinRateDto(data.first!!, 0, 0))
+            if (data.second!!) {
+                container[data.first!!]!!.wins++
+            } else {
+                container[data.first!!]!!.losses++
+            }
+            container
+        }.values.toList()
     }
 }

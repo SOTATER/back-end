@@ -3,6 +3,7 @@ package com.sota.clone.copyopgg.utils
 import com.sota.clone.copyopgg.domain.entities.*
 import com.sota.clone.copyopgg.web.dto.summoners.LeagueSummonerDTO
 import com.sota.clone.copyopgg.web.dto.summoners.SummonerDTO
+import com.sota.clone.copyopgg.web.dto.summoners.SummonerInfoDTO
 import org.apache.commons.lang3.RandomStringUtils
 import kotlin.random.Random
 
@@ -16,6 +17,15 @@ class ConvertDataUtils {
             id = id,
             puuid = puuid,
             summonerLevel = summonerLevel
+        )
+
+        fun Summoner.toInfoDTO() = SummonerInfoDTO(
+            id = id,
+            puuid = puuid,
+            name = name,
+            profileIconId = profileIconId,
+            summonerLevel = summonerLevel,
+            leagueInfo = null,
         )
 
         fun SummonerDTO.toEntity() = Summoner(

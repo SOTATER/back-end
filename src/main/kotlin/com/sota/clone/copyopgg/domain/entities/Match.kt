@@ -681,11 +681,21 @@ class MatchTeam {
 }
 
 enum class IndividualPosition {
-    TOP, JUNGLE, MIDDLE, BOTTOM, UTILITY, Invalid
+    TOP, JUNGLE, MIDDLE, BOTTOM, UTILITY, Invalid;
+
+    companion object {
+        private val nameMap: Map<String, IndividualPosition> = values().associateBy(IndividualPosition::name)
+        fun fromName(name: String): IndividualPosition? = nameMap[name]
+    }
 }
 
 enum class LanePosition {
-    TOP, JUNGLE, MIDDLE, BOTTOM, UTILITY, NONE
+    TOP, JUNGLE, MIDDLE, BOTTOM, UTILITY, NONE;
+
+    companion object {
+        private val nameMap: Map<String, LanePosition> = values().associateBy(LanePosition::name)
+        fun fromName(name: String): LanePosition? = nameMap[name]
+    }
 }
 
 enum class MatchRole {

@@ -1,5 +1,6 @@
 package com.sota.clone.copyopgg.web.rest
 
+import com.sota.clone.copyopgg.domain.dto.ChampionWinRateDto
 import com.sota.clone.copyopgg.domain.entities.Match
 import com.sota.clone.copyopgg.domain.services.MatchService
 import com.sota.clone.copyopgg.domain.services.RiotApiService
@@ -36,6 +37,15 @@ class MatchController(
             ResponseEntity.ok(matchService.updateMatchesByPuuid(puuid))
         } catch (e: Error) {
             ResponseEntity.badRequest().body(-1)
+        }
+    }
+
+    @GetMapping("/statistics/weekly-win-rate/by-puuid/{puuid}")
+    fun getWeeklyWinRate(@PathVariable(value = "puuid", required = true) puuid: String): ResponseEntity<List<ChampionWinRateDto>> {
+        return try {
+            ResponseEntity.ok(matchService.getWinRatiosLastSevenDays(puuid))
+        } catch (e: Error) {
+            ResponseEntity.notFound().build()
         }
     }
 }
