@@ -25,7 +25,7 @@ class ConvertDataUtils {
             name = name,
             profileIconId = profileIconId,
             summonerLevel = summonerLevel,
-            leagueInfo = null,
+            leagueInfo = null
         )
 
         fun SummonerDTO.toEntity() = Summoner(
