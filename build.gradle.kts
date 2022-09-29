@@ -7,6 +7,11 @@ plugins {
 	kotlin("jvm") version "1.5.10"
 	kotlin("plugin.spring") version "1.5.10"
 	kotlin("plugin.jpa") version "1.5.10"
+	jacoco
+}
+
+jacoco {
+	toolVersion = "0.8.7"
 }
 
 group = "com.sota.clone"
@@ -27,8 +32,10 @@ dependencies {
 	implementation("io.springfox:springfox-swagger-ui:3.0.0")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+
 	runtimeOnly("org.postgresql:postgresql")
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
+
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.apache.commons:commons-lang3")
 	testImplementation("org.jetbrains.kotlin:kotlin-test:1.1.51")
@@ -46,6 +53,19 @@ tasks.withType<KotlinCompile> {
 		freeCompilerArgs = listOf("-Xjsr305=strict")
 		jvmTarget = "1.8"
 	}
+}
+
+tasks.jacocoTestReport {
+	reports {
+		html.isEnabled = true
+		xml.isEnabled = true
+	}
+
+	classDirectories.setFrom(files(classDirectories.files.map {
+		fileTree(it).matching {
+			exclude("com/**/CopyOpggApplication.kt")
+		}
+	}))
 }
 
 tasks.withType<Test> {
