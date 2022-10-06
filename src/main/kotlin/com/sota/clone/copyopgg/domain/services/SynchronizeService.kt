@@ -16,6 +16,7 @@ class SynchronizeService(
     @Autowired val summonerRepository: SummonerRepository,
     @Autowired val leagueSummonerRepository: LeagueSummonerRepository,
     @Autowired val leagueRepository: LeagueRepository,
+    @Autowired val matchService: MatchService,
     @Autowired val riotApiService: RiotApiService
 ) {
     val logger: Logger = LoggerFactory.getLogger(SynchronizeService::class.java)
@@ -46,6 +47,7 @@ class SynchronizeService(
             summonerRepository.save(summoner)
             leagueSummoner.forEach { leagueSummonerRepository.save(it) }
             league.forEach { leagueRepository.save(it) }
+            matchService.updateMatchesByPuuid(this.puuid)
         } ?: throw Exception("Summoner doesn't exist in DB with id $summonerId")
     }
 }

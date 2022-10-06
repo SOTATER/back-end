@@ -1,6 +1,4 @@
 spring:
-  profiles:
-    active: local
   datasource:
     url: ${COPY_OPGG_DATASOURCE_URL}
     username: ${COPY_OPGG_DATASOURCE_USERNAME}
