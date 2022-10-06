@@ -10,7 +10,7 @@ services:
         ports:
         - 15432:5432
         volumes:
-        - ${LOCAL_HOME}/docker/pgsql/pgdata:/var/lib/postgresql/data
+        - pgdata:/var/lib/postgresql/data
         environment:
         - POSTGRES_USER=${POSTGRES_USER}
         - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
@@ -30,3 +30,5 @@ services:
             dockerfile: ./docker/app/Dockerfile
         ports:
             - 8080:8080
+volumes:
+    pgdata:
