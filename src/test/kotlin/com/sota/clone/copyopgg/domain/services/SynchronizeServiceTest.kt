@@ -31,6 +31,9 @@ class SynchronizeServiceTest {
     @MockK
     private lateinit var riotApiService: RiotApiService
 
+    @MockK
+    private lateinit var matchService: MatchService
+
     @InjectMockKs
     @SpyK
     private lateinit var synchronizeService: SynchronizeService
@@ -58,6 +61,7 @@ class SynchronizeServiceTest {
         every { summonerRepository.save(any()) } just Runs
         every { leagueSummonerRepository.save(any()) } just Runs
         every { leagueRepository.save(any()) } just Runs
+        every { matchService.updateMatchesByPuuid(any()) } returns 1
 
         // when
         synchronizeService.refresh("tester")
@@ -71,6 +75,7 @@ class SynchronizeServiceTest {
             summonerRepository.save(any())
             leagueSummonerRepository.save(any())
             leagueRepository.save(any())
+            matchService.updateMatchesByPuuid(any())
         }
 
         verify(exactly = 1) {
@@ -81,6 +86,7 @@ class SynchronizeServiceTest {
             summonerRepository.save(any())
             leagueSummonerRepository.save(any())
             leagueRepository.save(any())
+            matchService.updateMatchesByPuuid(any())
         }
     }
 
@@ -113,6 +119,7 @@ class SynchronizeServiceTest {
             summonerRepository.save(any())
             leagueSummonerRepository.save(any())
             leagueRepository.save(any())
+            matchService.updateMatchesByPuuid(any())
         }
     }
 
@@ -150,6 +157,7 @@ class SynchronizeServiceTest {
             summonerRepository.save(any())
             leagueSummonerRepository.save(any())
             leagueRepository.save(any())
+            matchService.updateMatchesByPuuid(any())
         }
     }
 
@@ -192,6 +200,7 @@ class SynchronizeServiceTest {
             summonerRepository.save(any())
             leagueSummonerRepository.save(any())
             leagueRepository.save(any())
+            matchService.updateMatchesByPuuid(any())
         }
     }
 }
