@@ -1,6 +1,7 @@
 package com.sota.clone.copyopgg.web.rest
 
 import com.sota.clone.copyopgg.domain.dto.ChampionWinRateDto
+import com.sota.clone.copyopgg.domain.dto.MatchPageDto
 import com.sota.clone.copyopgg.domain.entities.Match
 import com.sota.clone.copyopgg.domain.services.MatchService
 import com.sota.clone.copyopgg.domain.services.RiotApiService
@@ -23,11 +24,11 @@ class MatchController(
         @PathVariable(value = "puuid") puuid: String,
         @RequestParam(value = "page", required = true) page: Int,
         @RequestParam(value = "pageSize", required = true, defaultValue = "20") pageSize: Int
-    ): ResponseEntity<List<MatchSummaryDTO>> {
+    ): ResponseEntity<MatchPageDto> {
         return try {
             ResponseEntity.ok(matchService.getMatches(puuid, page, pageSize))
         } catch (e: Error) {
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(listOf())
+            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build()
         }
     }
 
