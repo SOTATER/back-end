@@ -74,7 +74,7 @@ class MatchService(
                     name = summoner!!.name!!,
                     champion = player.matchSummonerChampion?.championName ?: "",
                     level = player.matchSummonerChampion?.champLevel!!,
-                    // TODO 소환사 주문 이름???
+                    // TODO 소환사 주문 이름?
                     spells = listOf(
                         player.matchSummonerChampion?.summoner1Id.toString(),
                         player.matchSummonerChampion?.summoner2Id.toString()

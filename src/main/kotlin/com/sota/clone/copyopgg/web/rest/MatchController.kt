@@ -23,13 +23,9 @@ class MatchController(
     fun getMatchSummonerSummaries(
         @PathVariable(value = "puuid") puuid: String,
         @RequestParam(value = "page", required = true) page: Int,
-        @RequestParam(value = "pageSize", required = true, defaultValue = "20") pageSize: Int
+        @RequestParam(value = "size", required = true, defaultValue = "20") pageSize: Int
     ): ResponseEntity<MatchPageDto> {
-        return try {
-            ResponseEntity.ok(matchService.getMatches(puuid, page, pageSize))
-        } catch (e: Error) {
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build()
-        }
+        return ResponseEntity.ok(matchService.getMatches(puuid, page, pageSize))
     }
 
     @GetMapping("/update/by-puuid/{puuid}")
@@ -42,7 +38,12 @@ class MatchController(
     }
 
     @GetMapping("/statistics/weekly-win-rate/by-puuid/{puuid}")
-    fun getWeeklyWinRate(@PathVariable(value = "puuid", required = true) puuid: String): ResponseEntity<List<ChampionWinRateDto>> {
+    fun getWeeklyWinRate(
+        @PathVariable(
+            value = "puuid",
+            required = true
+        ) puuid: String
+    ): ResponseEntity<List<ChampionWinRateDto>> {
         return try {
             ResponseEntity.ok(matchService.getWinRatiosLastSevenDays(puuid))
         } catch (e: Error) {
