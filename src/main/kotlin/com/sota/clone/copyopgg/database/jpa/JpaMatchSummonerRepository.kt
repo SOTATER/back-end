@@ -11,4 +11,6 @@ interface JpaMatchSummonerRepository : JpaRepository<MatchSummoner, Int> {
 
     fun findByPuuid(puuid: String, pageable: Pageable): List<MatchSummoner>
 
+    fun findFirstByPuuidOrderByIdDesc(puuid: String): MatchSummoner?
+
 }

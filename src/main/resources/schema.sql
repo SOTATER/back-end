@@ -94,7 +94,7 @@ create table if not exists matches_teams_ban_info (
 create table if not exists matches_summoners (
     "id" serial,
     "match_id" char(13) references matches,
-    "puuid" char(78) references summoners,
+    "puuid" char(78),
     "game_ended_in_early_surrender" boolean not null,
     "game_ended_in_surrender" boolean not null,
     "individual_position" text not null,
@@ -211,7 +211,13 @@ create table if not exists matches_summoners_vision (
 
 create table if not exists matches_summoners_item (
     "match_summoner_id" int references matches_summoners("id"),
-    "items" int[] not null,
+    "item0" int not null,
+    "item1" int not null,
+    "item2" int not null,
+    "item3" int not null,
+    "item4" int not null,
+    "item5" int not null,
+    "item6" int not null,
     "item_purchased" int not null,
     "consumable_purchased" int not null,
     "gold_earned" int not null,
