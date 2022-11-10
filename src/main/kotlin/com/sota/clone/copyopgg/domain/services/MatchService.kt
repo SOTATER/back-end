@@ -59,15 +59,16 @@ class MatchService(
     fun updateMatchesByPuuid(puuid: String): Int {
         // 현재 저장된 플레이어의 매치 중 가장 최신의 것의 id를 가져온다.
         logger.info("updateMatchesByPuuid called")
-        val latestMatch = matchRepo.findLatestMatchByPuuid(puuid)
+        val latestMatch = matchSummonerRepo.findByPuuidLastGame(puuid)
         // riot api를 통해 가져올 매치들의 id 목록 가져오기
         val ids = latestMatch?.let {
             riotApiService.getMatchIdsByPuuid(
                 puuid,
                 RiotApiService.MatchIdsParams(
-                    startTime = it.gameStartTimestamp!! / 1000
+                    startTime = it.match?.gameStartTimestamp!! / 1000
                 )
-            ).filter { matchId -> matchId != it.id }
+                ).reversed()
+                .filter { matchId -> matchId != it.match?.id }
         } ?: riotApiService.getMatchIdsByPuuid(puuid, null)
 
         // 매치 id들을 이용하여 챔피언 통계 update
@@ -111,10 +112,11 @@ class MatchService(
                     season = detail.info.gameVersion.substring(0, 2),
                     queue = if (detail.info.queueId == 420) QueueType.RANKED_SOLO_5x5 else QueueType.RANKED_FLEX_SR
                 )
-
             )
         }
-        summonerChampionStatisticsRepo.saveAll(mySummonerChampionStatisticsList)
+        if (mySummonerChampionStatisticsList.size > 0) {
+            summonerChampionStatisticsRepo.saveAll(mySummonerChampionStatisticsList)
+        }
     }
 
     fun getMatchesByTypeAndDate(gameType: QueueType, until: Calendar): List<Match> {

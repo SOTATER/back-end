@@ -9,4 +9,6 @@ interface MatchSummonerRepository {
 
     fun findByPuuid(puuid: String, pageable: Pageable): List<MatchSummoner>
 
+    fun findByPuuidLastGame(puuid: String): MatchSummoner?
+
 }

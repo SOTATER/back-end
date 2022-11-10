@@ -20,4 +20,8 @@ class MatchSummonerRepositoryImpl(
         return jpaRepository.findByPuuid(puuid, pageable)
     }
 
+    override fun findByPuuidLastGame(puuid: String): MatchSummoner? {
+        return jpaRepository.findFirstByPuuidOrderByIdDesc(puuid)
+    }
+
 }
