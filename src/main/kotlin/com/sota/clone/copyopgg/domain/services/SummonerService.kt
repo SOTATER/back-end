@@ -7,11 +7,7 @@ import com.sota.clone.copyopgg.domain.repositories.LeagueRepository
 import com.sota.clone.copyopgg.domain.repositories.LeagueSummonerRepository
 import com.sota.clone.copyopgg.domain.repositories.SummonerChampionStatisticsRepository
 import com.sota.clone.copyopgg.domain.repositories.SummonerRepository
-import com.sota.clone.copyopgg.web.dto.summoners.QueueInfoDTO
-import com.sota.clone.copyopgg.web.dto.summoners.SummonerDTO
-import com.sota.clone.copyopgg.web.dto.summoners.SummonerInfoDTO
-import com.sota.clone.copyopgg.web.dto.summoners.SummonerChampionStatisticsDTO
-import com.sota.clone.copyopgg.web.dto.summoners.SummonerChampionStatisticsQueueDTO
+import com.sota.clone.copyopgg.web.dto.summoners.*
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -45,13 +41,22 @@ class SummonerService(
     fun getSummonerByName(name: String): SummonerInfoDTO? {
         logger.info("getSummonerByName called")
         return this.summonerRepo.findByName(name)?.let {
+            val queueInfo = this.getSummonerQueueInfo(it.id, QueueType.RANKED_SOLO_5x5)
             SummonerInfoDTO(
                 id = it.id,
                 puuid = it.puuid,
                 name = it.name,
                 profileIconId = it.profileIconId,
                 summonerLevel = it.summonerLevel,
-                leagueInfo = null,
+                leagueInfo = queueInfo?.let { q ->
+                    LeagueDTO(
+                        q.leagueId,
+                        q.tier,
+                        q.rank,
+                        q.queue,
+                        null,
+                        q.leaguePoints
+                    )},
             )
         } ?: riotApiService.getSummoner(name)?.let {
             this.summonerRepo.save(

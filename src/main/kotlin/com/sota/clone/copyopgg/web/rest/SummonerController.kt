@@ -8,6 +8,7 @@ import com.sota.clone.copyopgg.domain.services.SynchronizeService
 import com.sota.clone.copyopgg.web.dto.summoners.QueueInfoDTO
 import com.sota.clone.copyopgg.web.dto.summoners.SummonerInfoDTO
 import com.sota.clone.copyopgg.web.dto.summoners.SummonerChampionStatisticsQueueDTO
+import com.sota.clone.copyopgg.web.dto.summoners.SummonerProfileDTO
 import io.swagger.annotations.ApiOperation
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -46,11 +47,21 @@ class SummonerController(
             name = "searchWord",
             required = true
         ) searchWord: String
-    ): ResponseEntity<SummonerInfoDTO> {
+    ): ResponseEntity<SummonerProfileDTO> {
         logger.info("Searching for summoner information named '$searchWord'")
         return this.summonerService.getSummonerByName(searchWord)?.let {
-            ResponseEntity.ok().body(it)
-        } ?: ResponseEntity.notFound().build()
+            ResponseEntity.ok().body(SummonerProfileDTO(
+                it.id,
+                it.puuid,
+                it.leagueInfo?.tier,
+                it.leagueInfo?.rank,
+                it.profileIconId,
+                it.summonerLevel,
+                listOf(),
+                null,
+                null
+            ))
+        } ?: ResponseEntity.ok().body(null)
     }
 
     @GetMapping("/league/solo/{searchId}")
