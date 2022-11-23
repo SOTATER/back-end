@@ -27,7 +27,6 @@ class MatchService(
     @Autowired val matchTeamRepo: MatchTeamRepository,
     @Autowired val summonerChampionStatisticsRepo: SummonerChampionStatisticsRepository,
     @Autowired val riotApiService: RiotApiService,
-    val logger: Logger = LoggerFactory.getLogger(MatchService::class.java)
 ) {
 
     fun getMatchSummariesByPuuid(puuid: String, page: Int, pageSize: Int): List<MatchSummaryDTO> {
