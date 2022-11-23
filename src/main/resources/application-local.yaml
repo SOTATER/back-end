@@ -9,7 +9,7 @@ spring:
 
 
 application:
-  riotApiKey: "RGAPI-a65b0fb0-1798-41a5-8885-fbaab1a98644"
+  riotApiKey: "RGAPI-c1b1b7ba-4966-454a-98f6-2f4fcaf08547"
   external:
     datadragon:
       url: http://ddragon.leagueoflegends.com

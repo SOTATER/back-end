@@ -53,6 +53,7 @@ create table if not exists matches (
     "game_mode" text not null,
     "game_name" text not null,
     "game_start_timestamp" bigint not null,
+    "game_end_timestamp" bigint not null,
     "game_type" text not null,
     "game_version" text not null,
     "map_id" int not null,
@@ -106,6 +107,7 @@ create table if not exists matches_summoners (
     "team_early_surrendered" boolean not null,
     "team_id" int not null,
     "team_position" text not null,
+    "summoner_name" text not null,
     primary key("id"),
     unique ("match_id", "puuid"),
     foreign key ("puuid") references summoners ("puuid")

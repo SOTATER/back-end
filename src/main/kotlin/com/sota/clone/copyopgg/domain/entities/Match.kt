@@ -37,6 +37,9 @@ class Match {
     @Column(name = "game_start_timestamp")
     var gameStartTimestamp: Long? = null
 
+    @Column(name = "game_end_timestamp")
+    var gameEndTimestamp: Long? = null
+
     @Column(name = "game_type")
     @Enumerated(EnumType.STRING)
     var gameType: GameType? = null
@@ -166,6 +169,9 @@ class MatchSummoner {
 
     @Column(name = "team_position")
     var teamPosition: LanePosition? = null
+
+    @Column(name = "summoner_name")
+    var summonerName: String? = null
 
     @OneToOne(fetch = FetchType.LAZY, mappedBy = "matchSummoner", cascade = [CascadeType.ALL])
     var matchSummonerChampion: MatchSummonerChampion? = null

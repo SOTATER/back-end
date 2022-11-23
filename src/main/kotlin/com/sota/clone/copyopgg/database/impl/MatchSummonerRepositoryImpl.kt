@@ -23,6 +23,7 @@ class MatchSummonerRepositoryImpl(
 
     override fun findByPuuidLastGame(puuid: String): MatchSummoner? {
         return jpaRepository.findFirstByPuuidOrderByIdDesc(puuid)
+    }
 
     override fun findAllSummonerPuuidsInMatches(matches: List<String>): List<String> {
         return jpaRepository.findAllSummonerPuuidsInMatches(matches)

@@ -161,6 +161,7 @@ class RiotApiService(
             match.gameMode = GameMode.valueOf(info.gameMode)
             match.gameName = info.gameName
             match.gameStartTimestamp = info.gameStartTimestamp
+            match.gameEndTimestamp = info.gameEndTimestamp
             match.gameType = GameType.valueOf(info.gameType)
             match.gameVersion = info.gameVersion
             match.mapId = info.mapId
@@ -182,6 +183,7 @@ class RiotApiService(
                 matchSummoner.teamEarlySurrendered = participant.teamEarlySurrendered
                 matchSummoner.teamId = participant.teamId
                 matchSummoner.teamPosition = LanePosition.fromName(participant.teamPosition)
+                matchSummoner.summonerName = participant.summonerName
 
                 val matchSummonerChampion = MatchSummonerChampion()
                 matchSummonerChampion.matchSummoner = matchSummoner

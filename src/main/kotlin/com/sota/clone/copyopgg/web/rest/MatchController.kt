@@ -19,6 +19,9 @@ class MatchController(
     val matchService: MatchService
 ) {
 
+    /**
+     * 사용자 매치 정보 조회
+     */
     @GetMapping("/summaries/by-puuid/{puuid}")
     fun getMatchSummonerSummaries(
         @PathVariable(value = "puuid") puuid: String,

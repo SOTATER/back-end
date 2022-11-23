@@ -31,6 +31,10 @@ class MatchRepositoryImpl(
         this.jpaRepository.save(match)
     }
 
+    override fun findByIds(matchIds: List<String>): List<Match> {
+        return jpaRepository.findMatchesById(matchIds)
+    }
+
     override fun findByGameCreationLessThanAndQueueId(gameCreation: Long, queueId: Int): List<Match> {
         return this.jpaRepository.findByGameCreationLessThanAndQueueId(gameCreation, queueId)
     }

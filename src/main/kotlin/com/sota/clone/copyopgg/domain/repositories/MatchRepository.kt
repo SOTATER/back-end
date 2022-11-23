@@ -14,4 +14,6 @@ interface MatchRepository {
     fun findByGameCreationLessThanAndQueueId(gameCreation: Long, queueId: Int): List<Match>
 
     fun save(match: Match)
+
+    fun findByIds(matchIds: List<String>): List<Match>
 }

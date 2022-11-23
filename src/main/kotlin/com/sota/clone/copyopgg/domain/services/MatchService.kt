@@ -1,19 +1,19 @@
 package com.sota.clone.copyopgg.domain.services
 
 import com.sota.clone.copyopgg.domain.dto.*
-import com.sota.clone.copyopgg.domain.entities.Match
-import com.sota.clone.copyopgg.domain.entities.QueueType
-import com.sota.clone.copyopgg.domain.entities.SummonerChampionStatistics
+import com.sota.clone.copyopgg.domain.entities.*
 import com.sota.clone.copyopgg.domain.repositories.MatchRepository
 import com.sota.clone.copyopgg.domain.repositories.MatchSummonerRepository
 import com.sota.clone.copyopgg.domain.repositories.MatchTeamRepository
 import com.sota.clone.copyopgg.domain.repositories.SummonerChampionStatisticsRepository
 import com.sota.clone.copyopgg.web.dto.match.MatchSummaryDTO
+import com.sota.clone.copyopgg.web.dto.summoners.SummonerDTO
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
+import java.time.Instant
 import java.util.*
 
 @Service
@@ -23,7 +23,10 @@ class MatchService(
     @Autowired val matchTeamRepo: MatchTeamRepository,
     @Autowired val summonerChampionStatisticsRepo: SummonerChampionStatisticsRepository,
     @Autowired val riotApiService: RiotApiService,
-    @Autowired val summonerService: SummonerService
+    @Autowired val summonerService: SummonerService,
+    @Autowired val dataDragonService: DataDragonService,
+    @Autowired val summonerSpellsService: SummonerSpellsService,
+    @Autowired val championService: ChampionService
 ) {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -54,33 +57,54 @@ class MatchService(
         }.toList()
     }
 
-    fun getMatches(puuid: String, page: Int, pageSize: Int): MatchPageDto {
-        val pageable: Pageable = PageRequest.of(page, pageSize)
-        // 소환사의 puuid에 해당하는 MatchSummoner 목록을 조회한다.
-        val matchSummoners = matchSummonerRepo.findByPuuid(puuid, pageable)
-        for (matchSummoner in matchSummoners) {
-            matchSummoner.match!!.matchSummoners.map { it.puuid }
-        }
-        val allSummoners = summonerService.getSummonersByPuuids(
-            matchSummonerRepo.findAllSummonerPuuidsInMatches(matchSummoners.map { it.match!!.id!! }.toList())
-        ).associateBy { it.puuid }
-        val matches = matchSummoners.map { matchSummoner ->
-            val match = matchSummoner.match ?: throw Exception("match is null")
+    private fun matchToDto(match: Match, summoners: Map<String, SummonerDTO>): MatchDto {
+        val type = match.gameType!!.name
+        val gameMode = match.gameMode!!
+        val averageRank = ""
+        val dataDragonVersion = dataDragonService.getDataDragonVersionFromGameVersion(match.gameVersion!!)
+        val winTeamColor = TeamColor.fromId(match.matchTeams.first { it.win!! }.teamId)
+        val blueTeamSummoners = match.matchSummoners.filter { it.teamId == TeamColor.BLUE.id }
+        val redTeamSummoners = match.matchSummoners.filter { it.teamId == TeamColor.RED.id }
+        val blueTeamDto = matchTeamToDto(
+            match.matchTeams.first { it.teamId == TeamColor.BLUE.id }, blueTeamSummoners, dataDragonVersion
+        )
+        val redTeamDto = matchTeamToDto(
+            match.matchTeams.first { it.teamId == TeamColor.RED.id }, redTeamSummoners, dataDragonVersion
+        )
+        val duration = match.gameDuration!!
+        val instant = Instant.ofEpochMilli(match.gameEndTimestamp!!)
 
-            val players = mutableMapOf<Int, MutableList<MatchPlayerDto>>()
-            for (player in match.matchSummoners) {
-                val summoner = allSummoners[player.puuid]
-                val dto = MatchPlayerDto(
-                    name = summoner!!.name!!,
+        return MatchDto(
+            MatchType.SOLO_RANK,
+            averageRank,
+            blueTeamDto,
+            redTeamDto,
+            MatchLengthDto((duration / 60).toInt(), (duration % 60).toInt()),
+            "",
+            winTeamColor.color
+        )
+    }
+
+    private fun matchTeamToDto(
+        matchTeam: MatchTeam, summoners: List<MatchSummoner>, dataDragonVersion: String
+    ): MatchTeamDto {
+        val epicMonsterKilled =
+            EpicMonsterKilled(matchTeam.dragonKills ?: 0, matchTeam.baronKills ?: 0, matchTeam.towerKills ?: 0)
+        val matchPlayers = mutableListOf<MatchPlayerDto>()
+        for (player in summoners) {
+            matchPlayers.add(
+                MatchPlayerDto(
+                    name = player!!.summonerName!!,
                     champion = player.matchSummonerChampion?.championName ?: "",
                     level = player.matchSummonerChampion?.champLevel!!,
-                    // TODO 소환사 주문 이름?
                     spells = listOf(
-                        player.matchSummonerChampion?.summoner1Id.toString(),
-                        player.matchSummonerChampion?.summoner2Id.toString()
+                        summonerSpellsService.getSummonerSpellStringId(
+                            dataDragonVersion, "ko_KR", player.matchSummonerChampion?.summoner1Id!!
+                        ), summonerSpellsService.getSummonerSpellStringId(
+                            dataDragonVersion, "ko_KR", player.matchSummonerChampion?.summoner2Id!!
+                        )
                     ),
                     runes = player.matchSummonerPerk?.styles!!.map { it.style!! },
-                    // TODO 티어 구하기?
                     tier = "",
                     kda = KdaDto(
                         kills = player.matchSummonerCombat!!.kills!!,
@@ -111,50 +135,35 @@ class MatchService(
                     ),
                     gold = player.matchSummonerItem!!.goldEarned!!
                 )
-                // TODO teamId blue, red?
-                if (!players.containsKey(player.teamId!!)) {
-                    players[player.teamId!!] = mutableListOf()
-                }
-                players[player.teamId!!]!!.add(dto)
-            }
-            val teams = mutableMapOf<Int, MatchTeamDto>()
-            var winner: String = "none"
-            for (matchTeam in match.matchTeams) {
-                val teamDto = MatchTeamDto(
-                    players = players[matchTeam.teamId]!!.toList(),
-                    epicMonsterKilled = EpicMonsterKilled(
-                        dragon = matchTeam.dragonKills!!,
-                        baron = matchTeam.baronKills!!,
-                        tower = matchTeam.towerKills!!
-                    )
-                )
-                teams.computeIfAbsent(matchTeam.teamId!!) { teamDto }
-                if (matchTeam.win!!) {
-                    winner = if (matchTeam.teamId == 0) "blue" else "red"
-                }
-            }
-
-            MatchDto(
-                type = MatchType.SOLO_RANK,
-                // TODO 평균 랭크 구하기
-                averageRank = "",
-                // TODO 의미하는 바가 정확히 무엇인지?
-                time = "",
-                winner = winner,
-                // TODO teamId => red/blue?
-                blueTeam = teams[0]!!,
-                redTeam = teams[1]!!,
-                matchLengthDto = MatchLengthDto(
-                    minutes = (match.gameDuration!! / 60).toInt(),
-                    seconds = (match.gameDuration!! % 60).toInt()
-                )
             )
         }
-            .toList()
+        return MatchTeamDto(matchPlayers, epicMonsterKilled)
+    }
+
+    fun getMatches(matchIds: List<String>): List<MatchDto> {
+        val matches = matchRepo.findByIds(matchIds)
+        val allUserPuuids = mutableSetOf<String>()
+        for (match in matches) {
+            allUserPuuids.addAll(match.matchSummoners.map { it.puuid!! })
+        }
+        val allSummonersMap = summonerService.getSummonersByPuuids(allUserPuuids.toList()).associateBy { it.puuid }
+        return matches.map { matchToDto(it, allSummonersMap) }
+    }
+
+    fun getMatches(puuid: String, page: Int, pageSize: Int): MatchPageDto {
+        val pageable: Pageable = PageRequest.of(page, pageSize)
+        // 소환사의 puuid에 해당하는 MatchSummoner 목록을 조회한다.
+        val matchSummoners = matchSummonerRepo.findByPuuid(puuid, pageable)
+        val matches = getMatches(matchSummoners.map { it.match!!.id!! }.toList())
+        for (matchSummoner in matchSummoners) {
+            matchSummoner.match!!.matchSummoners.map { it.puuid }
+        }
+        val allSummoners = summonerService.getSummonersByPuuids(
+            matchSummonerRepo.findAllSummonerPuuidsInMatches(matchSummoners.map { it.match!!.id!! }.toList())
+        ).associateBy { it.puuid }
 
         return MatchPageDto(
-            matches = matches,
-            isLast = matchSummoners.isLast
+            matches = matches, isLast = matchSummoners.isLast
         )
     }
 
