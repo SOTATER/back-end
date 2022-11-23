@@ -2,23 +2,16 @@ package com.sota.clone.copyopgg.database.jpa
 
 import com.sota.clone.copyopgg.domain.entities.Summoner
 import com.sota.clone.copyopgg.domain.repositories.SummonerRepository
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.context.annotation.Primary
+import org.springframework.data.jpa.repository.support.JpaEntityInformationSupport
 import org.springframework.stereotype.Repository
 import org.springframework.transaction.annotation.Transactional
-import java.lang.Exception
 import javax.persistence.EntityManager
+import javax.persistence.EntityTransaction
 import javax.persistence.NoResultException
 import javax.persistence.PersistenceContext
-import org.slf4j.Logger
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.annotation.Primary
-import org.springframework.data.jpa.repository.JpaRepository
-import org.springframework.data.jpa.repository.support.JpaEntityInformation
-import org.springframework.data.jpa.repository.support.JpaEntityInformationSupport
-import org.springframework.data.repository.core.EntityInformation
-import org.springframework.data.repository.core.RepositoryInformation
-import javax.persistence.EntityTransaction
-import javax.transaction.Transaction
 
 @Primary
 @Repository
@@ -89,20 +82,10 @@ class JpaSummonerRepository(
         return query.resultList
     }
 
+    @Transactional(rollbackFor = [Exception::class])
     override fun saveAll(summoners: List<Summoner>) {
-        var tx: EntityTransaction? = null
-        try {
-            tx = entityManager.transaction
-            tx.begin()
-            for (summoner in summoners) {
-                entityManager.persist(summoner)
-            }
-            tx.commit()
-        } catch (e: Exception) {
-            tx?.rollback()
-            throw e
-        } finally {
-            entityManager.close()
+        for (summoner in summoners) {
+            entityManager.persist(summoner)
         }
     }
 }
