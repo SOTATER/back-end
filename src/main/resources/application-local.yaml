@@ -1,11 +1,19 @@
 spring:
   datasource:
-    url: jdbc:postgresql://postgres:5432/postgres
-    username: admin
-    password: admin
+    url: jdbc:postgresql://localhost:5432/copy-opgg
+    username: sotater
+    password: sotater123
+  jpa:
+    hibernate:
+      ddl-auto: update
+
 
 application:
-  riotApiKey:
+  riotApiKey: "RGAPI-a65b0fb0-1798-41a5-8885-fbaab1a98644"
 
 api:
   version: v1
+
+logging:
+  level:
+    com.sota.clone.copyopgg: debug

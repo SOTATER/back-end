@@ -11,7 +11,7 @@ create table if not exists summoners (
   	"revisiondate" bigint not null,
   	"name" varchar not null,
   	"id" varchar(63),
-  	"puuid" char(78) not null,
+  	"puuid" char(78) not null unique,
   	"summonerlevel" bigint not null,
   	primary key ("id")
 );
@@ -94,7 +94,7 @@ create table if not exists matches_teams_ban_info (
 create table if not exists matches_summoners (
     "id" serial,
     "match_id" char(13) references matches,
-    "puuid" char(78),
+    "puuid" char(78) not null,
     "game_ended_in_early_surrender" boolean not null,
     "game_ended_in_surrender" boolean not null,
     "individual_position" text not null,
@@ -107,7 +107,8 @@ create table if not exists matches_summoners (
     "team_id" int not null,
     "team_position" text not null,
     primary key("id"),
-    unique ("match_id", "puuid")
+    unique ("match_id", "puuid"),
+    foreign key ("puuid") references summoners ("puuid")
 );
 
 create table if not exists matches_summoners_champion (

@@ -25,7 +25,7 @@ class MatchController(
         @RequestParam(value = "pageSize", required = true, defaultValue = "20") pageSize: Int
     ): ResponseEntity<List<MatchSummaryDTO>> {
         return try {
-            ResponseEntity.ok(matchService.getMatchSummariesByPuuid(puuid, page, pageSize))
+            ResponseEntity.ok(matchService.getMatches(puuid, page, pageSize))
         } catch (e: Error) {
             ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(listOf())
         }

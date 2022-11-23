@@ -12,16 +12,18 @@ import javax.persistence.PersistenceContext
 import org.slf4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Primary
+import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.support.JpaEntityInformation
 import org.springframework.data.jpa.repository.support.JpaEntityInformationSupport
 import org.springframework.data.repository.core.EntityInformation
 import org.springframework.data.repository.core.RepositoryInformation
+import javax.persistence.EntityTransaction
+import javax.transaction.Transaction
 
 @Primary
 @Repository
 class JpaSummonerRepository(
-    @PersistenceContext
-    val entityManager: EntityManager,
+    @PersistenceContext val entityManager: EntityManager,
 ) : SummonerRepository {
     val entityInformation = JpaEntityInformationSupport.getEntityInformation(Summoner::class.java, entityManager)
     val logger: Logger = LoggerFactory.getLogger(JpaSummonerRepository::class.java)
@@ -39,11 +41,22 @@ class JpaSummonerRepository(
         return entityManager.find(Summoner::class.java, id)
     }
 
+    override fun findByPuuid(puuid: String): Summoner? {
+        val query = entityManager.createQuery(
+            "SELECT S FROM Summoner AS S " + "WHERE S.puuid = :puuid", Summoner::class.java
+        )
+        query.setParameter("puuid", puuid)
+        return try {
+            query.singleResult
+        } catch (e: NoResultException) {
+            null
+        }
+    }
+
     override fun findByName(name: String): Summoner? {
         logger.info("findByName called on name=$name")
         val query = entityManager.createQuery(
-            "select s from Summoner s " +
-                    "where lower(replace(s.name, ' ', ''))=lower(replace(:searchName, ' ', ''))",
+            "select s from Summoner s " + "where lower(replace(s.name, ' ', ''))=lower(replace(:searchName, ' ', ''))",
             Summoner::class.java
         )
         query.setParameter("searchName", name)
@@ -60,13 +73,36 @@ class JpaSummonerRepository(
         }
         logger.info("findSummonersByPartialName called on partial name=$partialName")
         val query = entityManager.createQuery(
-            "select s from Summoner s where " +
-                    "lower(replace(s.name, ' ', '')) like " +
-                    "concat('%',lower(replace(:partialName, ' ', '')),'%')",
+            "select s from Summoner s where " + "lower(replace(s.name, ' ', '')) like " + "concat('%',lower(replace(:partialName, ' ', '')),'%')",
             Summoner::class.java
         )
         query.setParameter("partialName", partialName)
         query.maxResults = size
         return query.resultList
+    }
+
+    override fun findByPuuids(puuids: List<String>): List<Summoner> {
+        val query = entityManager.createQuery(
+            "select s from Summoner s where s.puuid in :puuids", Summoner::class.java
+        )
+        query.setParameter("puuids", puuids)
+        return query.resultList
+    }
+
+    override fun saveAll(summoners: List<Summoner>) {
+        var tx: EntityTransaction? = null
+        try {
+            tx = entityManager.transaction
+            tx.begin()
+            for (summoner in summoners) {
+                entityManager.persist(summoner)
+            }
+            tx.commit()
+        } catch (e: Exception) {
+            tx?.rollback()
+            throw e
+        } finally {
+            entityManager.close()
+        }
     }
 }

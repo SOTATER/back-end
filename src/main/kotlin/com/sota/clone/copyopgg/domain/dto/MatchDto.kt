@@ -1,7 +1,7 @@
 package com.sota.clone.copyopgg.domain.dto
 
 data class MatchDto(
-    val type: String,
+    val type: MatchType,
     val averageRank: String,
     val blueTeam: MatchTeamDto,
     val redTeam: MatchTeamDto,
@@ -29,10 +29,16 @@ data class MatchPlayerDto(
     val runes: List<Int>,
     val tier: String,
     val kda: KdaDto,
-    val damage: Int,
-    val wardStat: WardStat,
+    val damage: DamageDto,
+    val wardStat: WardStatDto,
     val cs: CreepScoreDto,
-    val items: List<Int>
+    val items: List<Int>,
+    val gold: Int
+)
+
+data class DamageDto(
+    val sum: Int,
+    val champion: Int
 )
 
 data class CreepScoreDto(
@@ -40,7 +46,7 @@ data class CreepScoreDto(
     val monster: Int
 )
 
-data class WardStat(
+data class WardStatDto(
     val detectorPlaced: Int,
     val set: Int,
     val unset: Int
@@ -57,7 +63,7 @@ data class MatchLengthDto(
     val seconds: Int
 )
 
-data class SummaryPlayerDto(
-    val playerName: String,
-    val playerChampion: String
+data class MatchPageDto(
+    val matches: List<MatchDto>,
+    val isLast: Boolean
 )

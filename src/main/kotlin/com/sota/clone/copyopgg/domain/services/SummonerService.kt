@@ -42,6 +42,31 @@ class SummonerService(
         }
     }
 
+    fun getSummonersByPuuids(puuids: List<String>): List<SummonerDTO> {
+        // 이미 DB에 존재하는 소환사들
+        val existing = summonerRepo.findByPuuids(puuids).associateBy { it.puuid }
+        // DB에 존재하지 않는 소환사들 puuid 목록
+        val none = puuids.filter { !existing.containsKey(it) }
+        val newSummoners = none.mapNotNull { riotApiService.getSummonerByPuuid(it) }
+        summonerRepo.saveAll(newSummoners.map { Summoner(it) })
+        return listOf(*existing.values.map { SummonerDTO.fromEntity(it) }.toTypedArray(), *newSummoners.toTypedArray())
+    }
+
+    fun getSummonerByPuuid(puuid: String): SummonerDTO {
+        val summoner = summonerRepo.findByPuuid(puuid)
+        return if (summoner != null) {
+            SummonerDTO.fromEntity(summoner)
+        } else {
+            val fetched = riotApiService.getSummonerByPuuid(puuid)
+            if (fetched == null) {
+                throw Exception("puuid does not exist.")
+            } else {
+                summonerRepo.save(Summoner(fetched))
+                fetched
+            }
+        }
+    }
+
     fun getSummonerByName(name: String): SummonerInfoDTO? {
         logger.info("getSummonerByName called")
         return this.summonerRepo.findByName(name)?.let {
@@ -113,7 +138,7 @@ class SummonerService(
 
         val summonerChampionsSoloQueue = mutableListOf<SummonerChampionStatisticsDTO>()
         val summonerChampionsFlexQueue = mutableListOf<SummonerChampionStatisticsDTO>()
-        val summonerChampionsTotalMap = mutableMapOf<Int,SummonerChampionStatisticsDTO>()
+        val summonerChampionsTotalMap = mutableMapOf<Int, SummonerChampionStatisticsDTO>()
 
         summonerChampionStatsitics.forEach {
             if (it.queue == QueueType.RANKED_SOLO_5x5 && summonerChampionsSoloQueue.size < 7) {
@@ -130,8 +155,7 @@ class SummonerService(
                         season = it.season
                     )
                 )
-            }
-            else if (it.queue == QueueType.RANKED_FLEX_SR && summonerChampionsFlexQueue.size < 7) {
+            } else if (it.queue == QueueType.RANKED_FLEX_SR && summonerChampionsFlexQueue.size < 7) {
                 summonerChampionsFlexQueue.add(
                     SummonerChampionStatisticsDTO(
                         minionsKilledAll = it.minions_killed_all,
@@ -147,18 +171,17 @@ class SummonerService(
                 )
             }
             summonerChampionsTotalMap[it.champion_id]?.addQueueType(it) ?: run {
-                summonerChampionsTotalMap[it.champion_id] =
-                    SummonerChampionStatisticsDTO(
-                        minionsKilledAll = it.minions_killed_all,
-                        killsAll = it.kills_all,
-                        assistsAll = it.assists_all,
-                        deathsAll = it.deaths_all,
-                        played = it.played,
-                        wins = it.wins,
-                        championId = it.champion_id,
-                        puuid = it.puuid,
-                        season = it.season
-                    )
+                summonerChampionsTotalMap[it.champion_id] = SummonerChampionStatisticsDTO(
+                    minionsKilledAll = it.minions_killed_all,
+                    killsAll = it.kills_all,
+                    assistsAll = it.assists_all,
+                    deathsAll = it.deaths_all,
+                    played = it.played,
+                    wins = it.wins,
+                    championId = it.champion_id,
+                    puuid = it.puuid,
+                    season = it.season
+                )
             }
         }
 
@@ -167,12 +190,13 @@ class SummonerService(
             summonerChampionsTotalList.sortWith(compareBy({ it.played }, { it.wins }))
             summonerChampionsTotalList.reverse()
             if (summonerChampionsTotalList.size > 7) {
-                summonerChampionsTotalList = summonerChampionsTotalList.subList(0,7)
+                summonerChampionsTotalList = summonerChampionsTotalList.subList(0, 7)
             }
         }
 
         val summonerChampionsQueue = SummonerChampionStatisticsQueueDTO(
-            summonerChampionsSoloQueue, summonerChampionsFlexQueue, summonerChampionsTotalList)
+            summonerChampionsSoloQueue, summonerChampionsFlexQueue, summonerChampionsTotalList
+        )
 
         return summonerChampionsQueue
     }

@@ -42,6 +42,10 @@ class JdbcSummonerRepository(
         }
     }
 
+    override fun findByPuuid(puuid: String): Summoner? {
+        return null
+    }
+
     override fun findById(id: String): Summoner? {
         logger.info("jdbc findById called")
         return jdbc.queryForObject(selectSummonerByIdSql, this::mapToSummoner, id)
@@ -50,6 +54,14 @@ class JdbcSummonerRepository(
     override fun findSummonersByPartialName(partialName: String, size: Int): List<Summoner> {
         logger.info("jdbc findSummonersByPartialName called")
         return jdbc.query(selectSummonersSql, this::mapToSummoner, "$partialName%", size)
+    }
+
+    override fun findByPuuids(puuids: List<String>): List<Summoner> {
+        TODO("Not yet implemented")
+    }
+
+    override fun saveAll(summoners: List<Summoner>) {
+        TODO("Not yet implemented")
     }
 
     override fun findByName(name: String): Summoner? {
