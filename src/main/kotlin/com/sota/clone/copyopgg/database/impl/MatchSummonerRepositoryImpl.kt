@@ -1,6 +1,7 @@
 package com.sota.clone.copyopgg.database.impl
 
 import com.sota.clone.copyopgg.database.jpa.JpaMatchSummonerRepository
+import com.sota.clone.copyopgg.domain.entities.Match
 import com.sota.clone.copyopgg.domain.entities.MatchSummoner
 import com.sota.clone.copyopgg.domain.repositories.MatchSummonerRepository
 import org.springframework.beans.factory.annotation.Autowired
@@ -17,6 +18,10 @@ class MatchSummonerRepositoryImpl(
         this.jpaRepository.saveAll(matchSummoners)
     }
 
+    override fun findByMatchAndTeamId(match: Match, teamId: Int): List<MatchSummoner> {
+        return this.jpaRepository.findByMatchAndTeamId(match, teamId)
+    }
+
     override fun findByPuuid(puuid: String, pageable: Pageable): Page<MatchSummoner> {
         return jpaRepository.findByPuuid(puuid, pageable)
     }
@@ -27,6 +32,10 @@ class MatchSummonerRepositoryImpl(
 
     override fun findAllSummonerPuuidsInMatches(matches: List<String>): List<String> {
         return jpaRepository.findAllSummonerPuuidsInMatches(matches)
+    }
+
+    override fun findByPuuidFirst20Games(puuid: String): List<MatchSummoner> {
+        return jpaRepository.findFirst20ByPuuid(puuid)
     }
 
 }

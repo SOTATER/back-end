@@ -11,6 +11,7 @@ import com.sota.clone.copyopgg.domain.services.SynchronizeService
 import com.sota.clone.copyopgg.web.constants.WebConstants
 import com.sota.clone.copyopgg.web.dto.common.PageDto
 import com.sota.clone.copyopgg.web.dto.summoners.QueueInfoDTO
+import com.sota.clone.copyopgg.web.dto.summoners.SummonerDTO
 import com.sota.clone.copyopgg.web.dto.summoners.SummonerInfoDTO
 import com.sota.clone.copyopgg.web.dto.summoners.SummonerChampionStatisticsQueueDTO
 import io.swagger.annotations.ApiOperation
@@ -122,6 +123,15 @@ class SummonerController(
             ResponseEntity.ok(matchService.getMatches(puuid, page, size))
         } catch (e: Exception) {
             ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null)
+        }
+    }
+
+    @GetMapping("/{puuid}/played-with")
+    fun getSummonerPlayedWith(@PathVariable(value = "puuid", required = true) puuid: String): ResponseEntity<Any> {
+        return try {
+            ResponseEntity.ok(summonerService.getSummonerPlayedWithByPuuid(puuid))
+        } catch (e: Error) {
+            ResponseEntity.badRequest().body(-1)
         }
     }
 }

@@ -5,8 +5,10 @@ import com.sota.clone.copyopgg.domain.entities.Summoner
 import com.sota.clone.copyopgg.domain.entities.LeagueSummonerPK
 import com.sota.clone.copyopgg.domain.repositories.LeagueRepository
 import com.sota.clone.copyopgg.domain.repositories.LeagueSummonerRepository
+import com.sota.clone.copyopgg.domain.repositories.MatchSummonerRepository
 import com.sota.clone.copyopgg.domain.repositories.SummonerChampionStatisticsRepository
 import com.sota.clone.copyopgg.domain.repositories.SummonerRepository
+import com.sota.clone.copyopgg.web.dto.summoners.CogameSummonerDTO
 import com.sota.clone.copyopgg.web.dto.summoners.QueueInfoDTO
 import com.sota.clone.copyopgg.web.dto.summoners.SummonerDTO
 import com.sota.clone.copyopgg.web.dto.summoners.SummonerInfoDTO
@@ -20,6 +22,7 @@ import java.lang.Exception
 
 @Service
 class SummonerService(
+    @Autowired val matchSummonerRepo: MatchSummonerRepository,
     @Autowired val summonerRepo: SummonerRepository,
     @Autowired val summonerChampionStatisticsRepo: SummonerChampionStatisticsRepository,
     @Autowired val leagueSummonerRepo: LeagueSummonerRepository,
@@ -201,4 +204,61 @@ class SummonerService(
 
         return summonerChampionsQueue
     }
+
+    fun getSummonerPlayedWithByPuuid(puuid: String): List<CogameSummonerDTO> {
+        val playedWithCounter = mutableMapOf<String,PlayedWithInfo>()
+
+        matchSummonerRepo.findByPuuidFirst20Games(puuid).forEach { matchSummoner ->
+            matchSummoner.match!!.matchTeams.filter { it.teamId == matchSummoner.teamId }.single().win!!.also { won ->
+                matchSummonerRepo.findByMatchAndTeamId(matchSummoner.match!!, matchSummoner.teamId!!).filter { it.puuid != puuid }.forEach { matchSummonerPlayedWith ->
+                    val summonerPlayedWith = this.summonerRepo.findByPuuid(matchSummonerPlayedWith.puuid!!)?: run {
+                        val summonerDto = riotApiService.getSummonerById(matchSummonerPlayedWith.puuid!!)
+                        Summoner(
+                            accountId = summonerDto!!.accountId!!,
+                            profileIconId = summonerDto.profileIconId!!,
+                            revisionDate = summonerDto.revisionDate!!,
+                            name = summonerDto.name!!,
+                            id = summonerDto.id!!,
+                            puuid = summonerDto.puuid,
+                            summonerLevel = summonerDto.summonerLevel!!
+                        ).also { summoner ->
+                            this.summonerRepo.save(summoner)
+                        }
+                    }
+                    playedWithCounter[summonerPlayedWith.name]?.let { playedWithInfo ->
+                        playedWithInfo.games += 1
+                        if (won) {
+                            playedWithInfo.win += 1
+                        }
+                        else {
+                            playedWithInfo.lose += 1
+                        }
+                    } ?: run {
+                        if (won) {
+                            playedWithCounter[summonerPlayedWith.name] = PlayedWithInfo(1,1,0)
+                        }
+                        else {
+                            playedWithCounter[summonerPlayedWith.name] = PlayedWithInfo(1,0,1)
+                        }
+                    }
+                }
+            }
+        }
+
+        return playedWithCounter.toList().sortedByDescending { it.second.games }.asIterable().take(10).map {
+            CogameSummonerDTO(
+                name = it.first,
+                games = it.second.games,
+                win = it.second.win,
+                lose = it.second.lose
+            )
+        }
+    }
+
 }
+
+data class PlayedWithInfo(
+    var games: Int = 0,
+    var win: Int = 0,
+    var lose: Int = 0
+)
