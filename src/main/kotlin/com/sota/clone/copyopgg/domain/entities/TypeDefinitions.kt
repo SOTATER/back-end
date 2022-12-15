@@ -16,7 +16,7 @@ enum class GameType {
 enum class GameMode {
     ARAM,
     ARSR,
-    ASCENSION,
+    ASCENSION(),
     ASSASSINATE,
     CLASSIC,
     DARKSTAR,
@@ -37,7 +37,7 @@ enum class GameMode {
     TUTORIAL_MODULE_1,
     TUTORIAL_MODULE_2,
     TUTORIAL_MODULE_3,
-    URF
+    URF;
 }
 
 enum class QueueType(val queueId: Int) {

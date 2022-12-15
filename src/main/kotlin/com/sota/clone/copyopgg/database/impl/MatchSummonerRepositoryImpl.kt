@@ -4,6 +4,7 @@ import com.sota.clone.copyopgg.database.jpa.JpaMatchSummonerRepository
 import com.sota.clone.copyopgg.domain.entities.MatchSummoner
 import com.sota.clone.copyopgg.domain.repositories.MatchSummonerRepository
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Component
 
@@ -16,12 +17,16 @@ class MatchSummonerRepositoryImpl(
         this.jpaRepository.saveAll(matchSummoners)
     }
 
-    override fun findByPuuid(puuid: String, pageable: Pageable): List<MatchSummoner> {
+    override fun findByPuuid(puuid: String, pageable: Pageable): Page<MatchSummoner> {
         return jpaRepository.findByPuuid(puuid, pageable)
     }
 
     override fun findByPuuidLastGame(puuid: String): MatchSummoner? {
         return jpaRepository.findFirstByPuuidOrderByIdDesc(puuid)
+    }
+
+    override fun findAllSummonerPuuidsInMatches(matches: List<String>): List<String> {
+        return jpaRepository.findAllSummonerPuuidsInMatches(matches)
     }
 
 }

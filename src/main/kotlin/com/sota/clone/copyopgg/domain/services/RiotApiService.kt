@@ -19,10 +19,7 @@ import java.lang.Exception
 
 @Service
 class RiotApiService(
-    @Autowired
-    private val restTemplate: RestTemplate,
-    @Value(value = "\${application.riotApiKey}")
-    val apiKey: String
+    @Autowired private val restTemplate: RestTemplate, @Value(value = "\${application.riotApiKey}") val apiKey: String
 ) {
     val logger: Logger = LoggerFactory.getLogger(RiotApiService::class.java)
     val apiRootUrl = "https://kr.api.riotgames.com"
@@ -32,8 +29,7 @@ class RiotApiService(
         logger.info("get summoner named $searchWord via riot api")
         apiKey?.run {
             restTemplate.getForObject(
-                "$apiRootUrl/lol/summoner/v4/summoners/by-name/$searchWord?api_key=$this",
-                SummonerDTO::class.java
+                "$apiRootUrl/lol/summoner/v4/summoners/by-name/$searchWord?api_key=$this", SummonerDTO::class.java
             )
         }
     } catch (e: Exception) {
@@ -45,6 +41,25 @@ class RiotApiService(
 
     }
 
+    fun getSummonerByPuuid(puuid: String): SummonerDTO? {
+        logger.debug("get summoner info by puuid")
+        val headers = HttpHeaders()
+        headers.set("X-Riot-Token", apiKey)
+
+        // https://kr.api.riotgames.com/lol/summoner/v4/summoners/by-puuid/cFcpZffw0RLy50IzULIeIJ5ekaQ0gLzfGS8WSM7gWbuNotf6GZDy9kULEDfgRaRR4kf9m_GuZxsUTw
+        val uri =
+            UriComponentsBuilder.fromHttpUrl("$apiRootUrl/lol/summoner/v4/summoners/by-puuid/$puuid").toUriString()
+        val entity = HttpEntity<SummonerDTO?>(headers)
+        return try {
+            restTemplate.exchange<SummonerDTO>(
+                uri, HttpMethod.GET, entity
+            ).body
+        } catch (e: Exception) {
+            logger.debug("error occurred during Riot API call : ${e.message}")
+            null
+        }
+    }
+
     fun getMatchDetail(matchId: String): MatchDto? {
 
         logger.info("Calling Riot API... GET match info")
@@ -54,9 +69,7 @@ class RiotApiService(
         val uriBuilder = UriComponentsBuilder.fromHttpUrl("$matchBaseUrl/$matchId")
         val entity = HttpEntity<Any?>(headers)
         val response = restTemplate.exchange<MatchDto>(
-            uriBuilder.toUriString(),
-            HttpMethod.GET,
-            entity
+            uriBuilder.toUriString(), HttpMethod.GET, entity
         )
 
         return response.body
@@ -69,21 +82,15 @@ class RiotApiService(
         headers.set("X-Riot-Token", apiKey)
 
         val uriBuilder = params?.let {
-            UriComponentsBuilder.fromHttpUrl("$matchBaseUrl/by-puuid/$puuid/ids")
-                .queryParam("startTime", it.startTime)
-                .queryParam("endTime", it.endTime)
-                .queryParam("queue", it.queue)
-                .queryParam("type", it.type)
-                .queryParam("start", it.start)
-                .queryParam("count", it.count)
+            UriComponentsBuilder.fromHttpUrl("$matchBaseUrl/by-puuid/$puuid/ids").queryParam("startTime", it.startTime)
+                .queryParam("endTime", it.endTime).queryParam("queue", it.queue).queryParam("type", it.type)
+                .queryParam("start", it.start).queryParam("count", it.count)
         } ?: UriComponentsBuilder.fromHttpUrl("$matchBaseUrl/by-puuid/$puuid/ids")
 
         val entity = HttpEntity<Any?>(headers)
 
         val response = restTemplate.exchange<List<String>>(
-            uriBuilder.toUriString(),
-            HttpMethod.GET,
-            entity
+            uriBuilder.toUriString(), HttpMethod.GET, entity
         )
 
         return response.body ?: listOf()
@@ -93,8 +100,7 @@ class RiotApiService(
         logger.info("get summoner named $searchId via riot api")
         apiKey?.run {
             restTemplate.getForObject(
-                "$apiRootUrl/lol/summoner/v4/summoners/by-puuid/$searchId?api_key=$this",
-                SummonerDTO::class.java
+                "$apiRootUrl/lol/summoner/v4/summoners/by-puuid/$searchId?api_key=$this", SummonerDTO::class.java
             )
         }
     } catch (e: Exception) {
@@ -107,8 +113,7 @@ class RiotApiService(
         return try {
             apiKey?.run {
                 restTemplate.getForObject(
-                    "$apiRootUrl/lol/league/v4/leagues/$leagueId?api_key=$this",
-                    LeagueDTO::class.java
+                    "$apiRootUrl/lol/league/v4/leagues/$leagueId?api_key=$this", LeagueDTO::class.java
                 )
             }
         } catch (e: Exception) {
@@ -143,8 +148,7 @@ class RiotApiService(
 
     // Riot Match API Response Dto
     data class MatchDto(
-        val metadata: MetadataDto,
-        val info: InfoDto
+        val metadata: MetadataDto, val info: InfoDto
     ) {
         fun toMatch(): Match {
 
@@ -157,6 +161,7 @@ class RiotApiService(
             match.gameMode = GameMode.valueOf(info.gameMode)
             match.gameName = info.gameName
             match.gameStartTimestamp = info.gameStartTimestamp
+            match.gameEndTimestamp = info.gameEndTimestamp
             match.gameType = GameType.valueOf(info.gameType)
             match.gameVersion = info.gameVersion
             match.mapId = info.mapId
@@ -178,6 +183,7 @@ class RiotApiService(
                 matchSummoner.teamEarlySurrendered = participant.teamEarlySurrendered
                 matchSummoner.teamId = participant.teamId
                 matchSummoner.teamPosition = LanePosition.fromName(participant.teamPosition)
+                matchSummoner.summonerName = participant.summonerName
 
                 val matchSummonerChampion = MatchSummonerChampion()
                 matchSummonerChampion.matchSummoner = matchSummoner
@@ -346,9 +352,7 @@ class RiotApiService(
     }
 
     data class MetadataDto(
-        val dataVersion: String,
-        val matchId: String,
-        val participants: List<String>
+        val dataVersion: String, val matchId: String, val participants: List<String>
     )
 
     data class InfoDto(
@@ -479,39 +483,27 @@ class RiotApiService(
     )
 
     data class PerksDto(
-        val statPerks: PerkStatsDto,
-        val styles: List<PerkStyleDto>
+        val statPerks: PerkStatsDto, val styles: List<PerkStyleDto>
     )
 
     data class PerkStatsDto(
-        val defense: Int,
-        val flex: Int,
-        val offense: Int
+        val defense: Int, val flex: Int, val offense: Int
     )
 
     data class PerkStyleDto(
-        val description: String,
-        val selections: List<PerkStyleSelectionDto>,
-        val style: Int
+        val description: String, val selections: List<PerkStyleSelectionDto>, val style: Int
     )
 
     data class PerkStyleSelectionDto(
-        val perk: Int,
-        val var1: Int,
-        val var2: Int,
-        val var3: Int
+        val perk: Int, val var1: Int, val var2: Int, val var3: Int
     )
 
     data class TeamDto(
-        val bans: List<BanDto>,
-        val objectives: ObjectivesDto,
-        val teamId: Int,
-        val win: Boolean
+        val bans: List<BanDto>, val objectives: ObjectivesDto, val teamId: Int, val win: Boolean
     )
 
     data class BanDto(
-        val championId: Int,
-        val pickTurn: Int
+        val championId: Int, val pickTurn: Int
     )
 
     data class ObjectivesDto(
@@ -524,7 +516,6 @@ class RiotApiService(
     )
 
     data class ObjectiveDto(
-        val first: Boolean,
-        val kills: Int
+        val first: Boolean, val kills: Int
     )
 }

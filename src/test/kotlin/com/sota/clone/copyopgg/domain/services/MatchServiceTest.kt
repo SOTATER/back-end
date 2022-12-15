@@ -19,6 +19,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import org.springframework.beans.factory.annotation.Autowired
 import kotlin.test.assertEquals
 
 @ExtendWith(MockKExtension::class)
@@ -37,6 +38,18 @@ class MatchServiceTest {
 
     @MockK
     private lateinit var summonerChampionSTatisticsRepository: SummonerChampionStatisticsRepository
+
+    @MockK
+    private lateinit var summonerService: SummonerService
+
+    @MockK
+    private lateinit var dataDragonService: DataDragonService
+
+    @MockK
+    private lateinit var summonerSpellsService: SummonerSpellsService
+
+    @MockK
+    private lateinit var championService: ChampionService
 
     @InjectMockKs
     @SpyK

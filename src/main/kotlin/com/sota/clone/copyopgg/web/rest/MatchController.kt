@@ -1,6 +1,7 @@
 package com.sota.clone.copyopgg.web.rest
 
 import com.sota.clone.copyopgg.domain.dto.ChampionWinRateDto
+import com.sota.clone.copyopgg.domain.dto.MatchPageDto
 import com.sota.clone.copyopgg.domain.entities.Match
 import com.sota.clone.copyopgg.domain.services.MatchService
 import com.sota.clone.copyopgg.domain.services.RiotApiService
@@ -18,17 +19,16 @@ class MatchController(
     val matchService: MatchService
 ) {
 
+    /**
+     * 사용자 매치 정보 조회
+     */
     @GetMapping("/summaries/by-puuid/{puuid}")
     fun getMatchSummonerSummaries(
         @PathVariable(value = "puuid") puuid: String,
         @RequestParam(value = "page", required = true) page: Int,
-        @RequestParam(value = "pageSize", required = true, defaultValue = "20") pageSize: Int
-    ): ResponseEntity<List<MatchSummaryDTO>> {
-        return try {
-            ResponseEntity.ok(matchService.getMatchSummariesByPuuid(puuid, page, pageSize))
-        } catch (e: Error) {
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(listOf())
-        }
+        @RequestParam(value = "size", required = true, defaultValue = "20") pageSize: Int
+    ): ResponseEntity<MatchPageDto> {
+        return ResponseEntity.ok(matchService.getMatches(puuid, page, pageSize))
     }
 
     @GetMapping("/update/by-puuid/{puuid}")
@@ -41,7 +41,12 @@ class MatchController(
     }
 
     @GetMapping("/statistics/weekly-win-rate/by-puuid/{puuid}")
-    fun getWeeklyWinRate(@PathVariable(value = "puuid", required = true) puuid: String): ResponseEntity<List<ChampionWinRateDto>> {
+    fun getWeeklyWinRate(
+        @PathVariable(
+            value = "puuid",
+            required = true
+        ) puuid: String
+    ): ResponseEntity<List<ChampionWinRateDto>> {
         return try {
             ResponseEntity.ok(matchService.getWinRatiosLastSevenDays(puuid))
         } catch (e: Error) {
