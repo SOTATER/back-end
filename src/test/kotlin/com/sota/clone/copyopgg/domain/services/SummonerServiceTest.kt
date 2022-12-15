@@ -4,6 +4,7 @@ import com.sota.clone.copyopgg.domain.entities.QueueType
 import com.sota.clone.copyopgg.domain.entities.SummonerChampionStatistics
 import com.sota.clone.copyopgg.domain.repositories.LeagueRepository
 import com.sota.clone.copyopgg.domain.repositories.LeagueSummonerRepository
+import com.sota.clone.copyopgg.domain.repositories.MatchSummonerRepository
 import com.sota.clone.copyopgg.domain.repositories.SummonerRepository
 import com.sota.clone.copyopgg.domain.repositories.SummonerChampionStatisticsRepository
 import com.sota.clone.copyopgg.utils.ConvertDataUtils.Companion.replaceQueueType
@@ -24,6 +25,9 @@ import kotlin.test.assertEquals
 
 @ExtendWith(MockKExtension::class)
 class SummonerServiceTest {
+    @MockK
+    private lateinit var matchSummonerRepository: MatchSummonerRepository
+
     @MockK
     private lateinit var summonerRepository: SummonerRepository
 
