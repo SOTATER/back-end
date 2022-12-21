@@ -65,7 +65,18 @@ class SummonerController(
                 null,
                 null
             ))
-        } ?: ResponseEntity.ok().body(null)
+        } ?: ResponseEntity.ok().body(
+            SummonerProfileDTO(
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                listOf(),
+                null,
+                null,
+            ))
     }
 
     @GetMapping("/league/solo/{searchId}")

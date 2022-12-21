@@ -20,6 +20,7 @@ class SummonerService(
     @Autowired val summonerChampionStatisticsRepo: SummonerChampionStatisticsRepository,
     @Autowired val leagueSummonerRepo: LeagueSummonerRepository,
     @Autowired val leagueRepository: LeagueRepository,
+    @Autowired val synchronizeService: SynchronizeService,
     @Autowired val riotApiService: RiotApiService
 ) {
     val logger = LoggerFactory.getLogger(SummonerService::class.java)
@@ -64,8 +65,7 @@ class SummonerService(
         }
     }
 
-    fun getSummonerByName(name: String): SummonerInfoDTO? {
-        logger.info("getSummonerByName called")
+    private fun getSummonerFromRepo(name: String): SummonerInfoDTO? {
         return this.summonerRepo.findByName(name)?.let {
             val queueInfo = this.getSummonerQueueInfo(it.id, QueueType.RANKED_SOLO_5x5)
             SummonerInfoDTO(
@@ -84,7 +84,12 @@ class SummonerService(
                         q.leaguePoints
                     )},
             )
-        } ?: riotApiService.getSummoner(name)?.let {
+        }
+    }
+
+    fun getSummonerByName(name: String): SummonerInfoDTO? {
+        logger.info("getSummonerByName called")
+        return this.getSummonerFromRepo(name) ?: riotApiService.getSummoner(name)?.let {
             this.summonerRepo.save(
                 Summoner(
                     accountId = it.accountId!!,
@@ -96,14 +101,8 @@ class SummonerService(
                     summonerLevel = it.summonerLevel!!
                 )
             )
-            SummonerInfoDTO(
-                id = it.id,
-                puuid = it.puuid,
-                name = it.name,
-                profileIconId = it.profileIconId,
-                summonerLevel = it.summonerLevel,
-                leagueInfo = null,
-            )
+            this.synchronizeService.refresh(it.id)
+            this.getSummonerFromRepo(name)
         }
     }
 

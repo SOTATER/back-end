@@ -1,6 +1,7 @@
 create table if not exists leagues (
   queue queue not null,
   tier tier not null,
+  name text not null,
   league_id char(36),
   primary key ("league_id")
 );
@@ -106,8 +107,8 @@ create table if not exists matches_summoners (
     "role" text not null,
     "team_early_surrendered" boolean not null,
     "team_id" int not null,
-    "team_position" text not null,
     "summoner_name" text not null,
+    "team_position" text,
     primary key("id"),
     unique ("match_id", "puuid"),
     foreign key ("puuid") references summoners ("puuid")

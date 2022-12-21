@@ -21,8 +21,13 @@ class SynchronizeService(
 ) {
     val logger: Logger = LoggerFactory.getLogger(SynchronizeService::class.java)
 
-    fun refresh(summonerId: String) {
+    fun refresh(summonerId: String?) {
         logger.info("refresh called")
+        if (summonerId == null) {
+            logger.warn("Summoner id is null")
+            return
+        }
+
         // get summoner from db to get summoners puuid
         this.summonerRepository.findById(summonerId)?.run {
             val leagueSummoner = mutableListOf<LeagueSummoner>()
