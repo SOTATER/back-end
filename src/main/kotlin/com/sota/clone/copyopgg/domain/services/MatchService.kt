@@ -179,7 +179,7 @@ class MatchService(
                     startTime = it.match?.gameStartTimestamp!! / 1000
                 )
             ).reversed()
-                .filter { matchId -> matchId != it.match?.id }
+            .filter { matchId -> matchId != it.match?.id }
         } ?: riotApiService.getMatchIdsByPuuid(puuid, null)
         logger.debug("update ${ids.size} matches")
 

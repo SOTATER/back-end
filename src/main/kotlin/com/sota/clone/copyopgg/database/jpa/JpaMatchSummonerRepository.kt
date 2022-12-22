@@ -1,5 +1,6 @@
 package com.sota.clone.copyopgg.database.jpa
 
+import com.sota.clone.copyopgg.domain.entities.Match
 import com.sota.clone.copyopgg.domain.entities.MatchSummoner
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -17,10 +18,14 @@ interface JpaMatchSummonerRepository : JpaRepository<MatchSummoner, Int> {
     )
     fun findByPuuid(puuid: String, pageable: Pageable): Page<MatchSummoner>
 
+    fun findByMatchAndTeamId(match: Match, teamId: Int): List<MatchSummoner>
+
     fun findFirstByPuuidOrderByIdDesc(puuid: String): MatchSummoner?
 
     @Query(
         "SELECT DISTINCT MS.puuid FROM MatchSummoner AS MS WHERE MS.match.id IN :matchIds"
     )
     fun findAllSummonerPuuidsInMatches(@Param("matchIds") matchIds: List<String>): List<String>
+
+    fun findFirst20ByPuuid(puuid: String): List<MatchSummoner>
 }
