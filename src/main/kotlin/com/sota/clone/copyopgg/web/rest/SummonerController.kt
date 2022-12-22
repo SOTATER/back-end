@@ -14,6 +14,7 @@ import com.sota.clone.copyopgg.web.dto.summoners.QueueInfoDTO
 import com.sota.clone.copyopgg.web.dto.summoners.SummonerDTO
 import com.sota.clone.copyopgg.web.dto.summoners.SummonerInfoDTO
 import com.sota.clone.copyopgg.web.dto.summoners.SummonerChampionStatisticsQueueDTO
+import com.sota.clone.copyopgg.web.dto.summoners.CogameSummonerDTO
 import io.swagger.annotations.ApiOperation
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -126,12 +127,12 @@ class SummonerController(
         }
     }
 
-    @GetMapping("/{puuid}/played-with")
-    fun getSummonerPlayedWith(@PathVariable(value = "puuid", required = true) puuid: String): ResponseEntity<Any> {
+    @GetMapping("/{puuid}/cogamer")
+    fun getSummonerPlayedWith(@PathVariable(value = "puuid", required = true) puuid: String): ResponseEntity<List<CogameSummonerDTO>> {
         return try {
             ResponseEntity.ok(summonerService.getSummonerPlayedWithByPuuid(puuid))
         } catch (e: Error) {
-            ResponseEntity.badRequest().body(-1)
+            ResponseEntity.badRequest().body(listOf())
         }
     }
 }
