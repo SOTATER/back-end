@@ -1,0 +1,22 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:15432/postgres
+    username: admin
+    password: admin
+  jpa:
+    hibernate:
+      ddl-auto: update
+
+
+application:
+  riotApiKey: RGAPI-dd2b0b80-b05f-4a9e-94a4-7750fd9cc68b
+  external:
+    datadragon:
+      url: http://ddragon.leagueoflegends.com
+
+api:
+  version: v1
+
+logging:
+  level:
+    com.sota.clone.copyopgg: debug
